@@ -43,7 +43,7 @@ public class BankTransactionForwarder
 
     @Override
     public void onMessage(MapRecord<String, String, String> message) {
-        smso.convertAndSend(config.getStomp().getInventoryTopic(), message.getValue());
+        smso.convertAndSend(config.getStomp().getTransactionsTopic(), message.getValue());
     }
 
     @Override

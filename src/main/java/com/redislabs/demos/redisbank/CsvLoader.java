@@ -1,10 +1,13 @@
 package com.redislabs.demos.redisbank;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
@@ -15,6 +18,7 @@ import org.springframework.core.io.ClassPathResource;
 public class CsvLoader {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvLoader.class);
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     public static <T> List<T> loadObjectList(Class<T> type, String fileName) {
         try {
@@ -28,5 +32,10 @@ public class CsvLoader {
             LOGGER.error("Error occurred while loading object list from file " + fileName, e);
             return Collections.emptyList();
         }
+    }
+
+    public static <T> String serializeObject(T object) throws JsonProcessingException   {
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
+        return mapper.writeValueAsString(object);
     }
 }

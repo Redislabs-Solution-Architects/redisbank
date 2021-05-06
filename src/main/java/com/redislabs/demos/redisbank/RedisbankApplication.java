@@ -12,4 +12,5 @@ public class RedisbankApplication {
 		SpringApplication.run(RedisbankApplication.class, args);
 	}
 
+
 }

@@ -22,7 +22,7 @@ public @Data class Config {
 		private int port;
 		private String endpoint;
 		private String destinationPrefix;
-		private String inventoryTopic;
+		private String transactionsTopic;
 	}
 
 }
