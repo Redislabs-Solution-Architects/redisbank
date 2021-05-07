@@ -2,6 +2,10 @@ package com.redislabs.demos.redisbank;
 
 import java.time.Duration;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.data.redis.connection.stream.MapRecord;
@@ -18,18 +22,22 @@ import org.springframework.stereotype.Component;
 public class BankTransactionForwarder
         implements InitializingBean, DisposableBean, StreamListener<String, MapRecord<String, String, String>> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BankTransactionForwarder.class);
     private static final String TRANSACTIONS_STREAM = "transactions";
 
     private final Config config;
     private final StringRedisTemplate redis;
     private final SimpMessageSendingOperations smso;
+    private final BankTransactionRepository btr;
     private StreamMessageListenerContainer<String, MapRecord<String, String, String>> container;
     private Subscription subscription;
 
-    public BankTransactionForwarder(Config config, StringRedisTemplate redis, SimpMessageSendingOperations smso) {
+    public BankTransactionForwarder(Config config, StringRedisTemplate redis, SimpMessageSendingOperations smso,
+            BankTransactionRepository btr) {
         this.config = config;
         this.redis = redis;
         this.smso = smso;
+        this.btr = btr;
     }
 
     @Override
@@ -43,17 +51,27 @@ public class BankTransactionForwarder
 
     @Override
     public void onMessage(MapRecord<String, String, String> message) {
+        // Update dataset
+        String messageString = message.getValue().get("transaction");
+        try {
+            BankTransaction bankTransaction = CsvUtil.deserializeObject(messageString, BankTransaction.class);
+            btr.save(bankTransaction);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Error parsing JSON: {}", e.getMessage());
+        }
+
+        // Stream message to websocket connection topic
         smso.convertAndSend(config.getStomp().getTransactionsTopic(), message.getValue());
     }
 
     @Override
     public void destroy() throws Exception {
-		if (subscription != null) {
-			subscription.cancel();
-		}
-		if (container != null) {
-			container.stop();
-		}
+        if (subscription != null) {
+            subscription.cancel();
+        }
+        if (container != null) {
+            container.stop();
+        }
     }
 
 }

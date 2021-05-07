@@ -3,8 +3,6 @@ package com.redislabs.demos.redisbank;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -32,14 +30,15 @@ public class BankTransactionGenerator {
 
     public BankTransactionGenerator(StringRedisTemplate redis)
             throws NoSuchAlgorithmException, UnsupportedEncodingException {
+
         this.redis = redis;
-        transactionSources = CsvLoader.loadObjectList(TransactionSource.class, "transaction_sources.csv");
+        transactionSources = CsvUtil.loadObjectList(TransactionSource.class, "transaction_sources.csv");
         random = SecureRandom.getInstance("SHA1PRNG");
         random.setSeed("lars".getBytes("UTF-8"));
 
         // Don't cross the streams! ;)
         redis.delete(TRANSACTIONS_STREAM);
-        List<BankTransaction> transactions = CsvLoader.loadObjectList(BankTransaction.class, "transactions.csv");
+        List<BankTransaction> transactions = CsvUtil.loadObjectList(BankTransaction.class, "transactions.csv");
         for (BankTransaction bankTransaction : transactions) {
             bankTransaction.setToAccountName("lars");
             bankTransaction.setToAccount(FakeIbanUtil.generateFakeIbanFrom("lars"));
@@ -60,7 +59,7 @@ public class BankTransactionGenerator {
         Map<String, String> update = new HashMap<>();
         String transactionString;
         try {
-            transactionString = CsvLoader.serializeObject(bankTransaction);
+            transactionString = CsvUtil.serializeObject(bankTransaction);
             LOGGER.info("Update: {}", transactionString);
             update.put(TRANSACTION_KEY, transactionString);
             redis.opsForStream().add(TRANSACTIONS_STREAM, update);

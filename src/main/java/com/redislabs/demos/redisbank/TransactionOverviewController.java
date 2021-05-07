@@ -1,5 +1,8 @@
 package com.redislabs.demos.redisbank;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.redislabs.demos.redisbank.Config.StompConfig;
 import com.redislabs.lettusearch.SearchResults;
 
@@ -16,10 +19,12 @@ public class TransactionOverviewController {
 
     private final Config config;
     private final UserSessionRepository userSessionRepository;
+    private final BankTransactionRepository btr;
 
-    public TransactionOverviewController(Config config, UserSessionRepository userSessionRepository) {
+    public TransactionOverviewController(Config config, UserSessionRepository userSessionRepository, BankTransactionRepository btr) {
         this.config = config;
         this.userSessionRepository = userSessionRepository;
+        this.btr = btr;
     }
 
     @GetMapping("/config/stomp")
@@ -35,6 +40,13 @@ public class TransactionOverviewController {
     @GetMapping("/list")
     public SearchResults<String, String> listTransactionsByDate() {
         return null;
+    }
+
+    @GetMapping("/transactions")
+    public List<BankTransaction> listTransactions() {
+        List<BankTransaction> results = new ArrayList<BankTransaction>();
+        btr.findByToAccount(FakeIbanUtil.generateFakeIbanFrom("lars")).forEach(results::add);
+        return results;
     }
 
     @GetMapping(value = "/login")

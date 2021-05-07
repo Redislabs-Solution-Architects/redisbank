@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -15,9 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-public class CsvLoader {
+public class CsvUtil {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(CsvLoader.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CsvUtil.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static <T> List<T> loadObjectList(Class<T> type, String fileName) {
@@ -37,5 +38,10 @@ public class CsvLoader {
     public static <T> String serializeObject(T object) throws JsonProcessingException   {
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
         return mapper.writeValueAsString(object);
+    }
+
+    public static <T> T deserializeObject(String value, Class<T> clazz) throws JsonMappingException, JsonProcessingException    {
+        mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
+        return mapper.readValue(value, clazz);
     }
 }
