@@ -56,6 +56,7 @@ public class BankTransactionForwarder
         try {
             BankTransaction bankTransaction = CsvUtil.deserializeObject(messageString, BankTransaction.class);
             btr.save(bankTransaction);
+            LOGGER.info("Saved transaction: {}", messageString);
         } catch (JsonProcessingException e) {
             LOGGER.error("Error parsing JSON: {}", e.getMessage());
         }

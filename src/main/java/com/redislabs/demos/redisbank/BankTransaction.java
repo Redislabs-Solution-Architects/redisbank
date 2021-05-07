@@ -20,9 +20,7 @@ public class BankTransaction {
     private Long id;
     private String fromAccount;
     private String fromAccountName;
-    @Indexed
     private String toAccount;
-    @Indexed
     private String toAccountName;
     private Double amount;
     private String description;

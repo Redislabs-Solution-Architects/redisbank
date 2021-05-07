@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.redislabs.demos.redisbank.Config.StompConfig;
+import com.redislabs.lettusearch.RediSearchCommands;
 import com.redislabs.lettusearch.SearchResults;
+import com.redislabs.lettusearch.StatefulRediSearchConnection;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,14 +19,19 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin
 public class TransactionOverviewController {
 
+    private static final String TRANSACTIONS_INDEX = "transaction_idx";
+
     private final Config config;
     private final UserSessionRepository userSessionRepository;
     private final BankTransactionRepository btr;
+    private final StatefulRediSearchConnection<String, String> srsc;
 
-    public TransactionOverviewController(Config config, UserSessionRepository userSessionRepository, BankTransactionRepository btr) {
+    public TransactionOverviewController(Config config, UserSessionRepository userSessionRepository,
+            BankTransactionRepository btr, StatefulRediSearchConnection<String, String> srsc) {
         this.config = config;
         this.userSessionRepository = userSessionRepository;
         this.btr = btr;
+        this.srsc = srsc;
     }
 
     @GetMapping("/config/stomp")
@@ -43,9 +50,9 @@ public class TransactionOverviewController {
     }
 
     @GetMapping("/transactions")
-    public List<BankTransaction> listTransactions() {
-        List<BankTransaction> results = new ArrayList<BankTransaction>();
-        btr.findByToAccount(FakeIbanUtil.generateFakeIbanFrom("lars")).forEach(results::add);
+    public SearchResults<String, String> listTransactions() {
+        RediSearchCommands<String, String> commands = srsc.sync();
+        SearchResults<String, String> results = commands.search(TRANSACTIONS_INDEX, "lars");
         return results;
     }
 
@@ -54,7 +61,7 @@ public class TransactionOverviewController {
         String accountNumber = FakeIbanUtil.generateFakeIbanFrom(userName);
         UserSession userSession = new UserSession(userName, accountNumber);
         userSessionRepository.save(userSession);
-        
+
     }
 
 }
