@@ -1,43 +1,55 @@
-var watchExampleVM = new Vue({
-  el: '#table1',
+var transactionsOverview = new Vue({
+  el: '#transactionstable',
   data: {
-    question: '',
-    answer: '',
-    items: ''
+    items: [],
+    received_messages: [],
+    connected: false
   },
   mounted() {
-    this.debouncedGetAnswer()
-  },
-  watch: {
-    // whenever question changes, this function will run
-    question: function (newQuestion, oldQuestion) {
-      this.answer = 'Searching...'
-      this.debouncedGetAnswer()
-    }
-  },
-  created: function () {
-    // _.debounce is a function provided by lodash to limit how
-    // often a particularly expensive operation can be run.
-    // In this case, we want to limit how often we access
-    // yesno.wtf/api, waiting until the user has completely
-    // finished typing before making the ajax request. To learn
-    // more about the _.debounce function (and its cousin
-    // _.throttle), visit: https://lodash.com/docs#debounce
-    this.debouncedGetAnswer = _.debounce(this.getAnswer, 100)
+    this.getTransactions()
   },
   methods: {
-    getAnswer: function () {
-      this.answer = 'Thinking...'
-      var searchUrl = '/api/transactions'
+    getTransactions: function () {
+      var transactionsUrl = '/api/transactions'
       var vm = this
-      axios.get(searchUrl)
+      axios.get(transactionsUrl)
         .then(function (response) {
-          vm.answer = ''
           vm.items = response.data
         })
         .catch(function (error) {
-          vm.answer = 'Error! Could not reach the API. ' + error
+          console.log('Error! Could not reach the API. ' + error)
+        })
+    },
+
+    connect: function () {
+      var stompConfigUrl = '/api/stomp/config'
+      axios.get(stompConfigUrl)
+        .then(function (response) {
+          var stompconfig = response.data
+          this.socket = new SockJS('http://' + stompconfig.host + ':' + stompconfig.port + stompconfig.endpoint)
+          this.stompClient = Stomp.over(this.socket)
+          this.stompClient.connect(
+            {},
+            frame => {
+              this.connected = true
+              console.log(frame)
+              this.stompClient.subscribe(stompconfig.transactionsTopic, tick => {
+                console.log(tick)
+                this.received_messages.push(JSON.parse(tick.body).content)
+              })
+            },
+            error => {
+              console.log(error)
+              this.connected = false
+            }
+          )
+
+
+        })
+        .catch(function (error) {
+          console.log('Error fetching stomp config.' + error)
         })
     }
+
   }
 })
