@@ -7,6 +7,7 @@ var transactionsOverview = new Vue({
   },
   mounted() {
     this.getTransactions()
+    this.connect()
   },
   methods: {
     getTransactions: function () {
@@ -22,28 +23,36 @@ var transactionsOverview = new Vue({
     },
 
     connect: function () {
-      var stompConfigUrl = '/api/stomp/config'
+      var vm = this
+      var stompConfigUrl = '/api/config/stomp'
       axios.get(stompConfigUrl)
         .then(function (response) {
           var stompconfig = response.data
-          this.socket = new SockJS('http://' + stompconfig.host + ':' + stompconfig.port + stompconfig.endpoint)
-          this.stompClient = Stomp.over(this.socket)
+          console.log(stompconfig)
+          var url = 'ws://' + stompconfig.host + ':' + stompconfig.port + stompconfig.endpoint
+          console.log(url)
+          this.stompClient = Stomp.client(url)
+          console.log("Stomp:", this.stompClient)
+
           this.stompClient.connect(
             {},
             frame => {
               this.connected = true
-              console.log(frame)
+              console.log("frame:",frame)
               this.stompClient.subscribe(stompconfig.transactionsTopic, tick => {
-                console.log(tick)
-                this.received_messages.push(JSON.parse(tick.body).content)
+                console.log("tick:", tick)
+                console.log("body:" , tick.body)
+                var transaction = JSON.parse(tick.body)
+                var transtrans = JSON.parse(transaction.transaction)
+                console.log("transaciton:" , transtrans)
+                console.log("id:", transtrans.id)
+                vm.items.unshift(transtrans)
               })
             },
             error => {
-              console.log(error)
+              console.log("err", error)
               this.connected = false
-            }
-          )
-
+            })
 
         })
         .catch(function (error) {
