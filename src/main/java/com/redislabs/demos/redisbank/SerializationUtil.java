@@ -16,9 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 
-public class CsvUtil {
+public class SerializationUtil {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(CsvUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SerializationUtil.class);
     private static final ObjectMapper mapper = new ObjectMapper();
 
     public static <T> List<T> loadObjectList(Class<T> type, String fileName) {

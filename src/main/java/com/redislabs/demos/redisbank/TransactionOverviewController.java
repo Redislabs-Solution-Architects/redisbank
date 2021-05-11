@@ -1,8 +1,5 @@
 package com.redislabs.demos.redisbank;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.redislabs.demos.redisbank.Config.StompConfig;
 import com.redislabs.lettusearch.RediSearchCommands;
 import com.redislabs.lettusearch.SearchResults;

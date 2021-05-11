@@ -51,10 +51,10 @@ public class BankTransactionForwarder
 
     @Override
     public void onMessage(MapRecord<String, String, String> message) {
-        // Update dataset
+        // Update search index whenever a new transaction arrives via the stream
         String messageString = message.getValue().get("transaction");
         try {
-            BankTransaction bankTransaction = CsvUtil.deserializeObject(messageString, BankTransaction.class);
+            BankTransaction bankTransaction = SerializationUtil.deserializeObject(messageString, BankTransaction.class);
             btr.save(bankTransaction);
             LOGGER.info("Saved transaction: {}", messageString);
         } catch (JsonProcessingException e) {

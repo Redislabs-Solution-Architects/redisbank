@@ -3,7 +3,8 @@ var transactionsOverview = new Vue({
   data: {
     items: [],
     received_messages: [],
-    connected: false
+    connected: false,
+    account: 'bar'
   },
   mounted() {
     this.getTransactions()
@@ -16,6 +17,8 @@ var transactionsOverview = new Vue({
       axios.get(transactionsUrl)
         .then(function (response) {
           vm.items = response.data
+          vm.account = response.data[0].toAccount
+          vm.balance = response.data[0].balanceAfter
         })
         .catch(function (error) {
           console.log('Error! Could not reach the API. ' + error)
@@ -28,29 +31,23 @@ var transactionsOverview = new Vue({
       axios.get(stompConfigUrl)
         .then(function (response) {
           var stompconfig = response.data
-          console.log(stompconfig)
           var url = 'ws://' + stompconfig.host + ':' + stompconfig.port + stompconfig.endpoint
-          console.log(url)
           this.stompClient = Stomp.client(url)
-          console.log("Stomp:", this.stompClient)
 
           this.stompClient.connect(
             {},
             frame => {
               this.connected = true
-              console.log("frame:",frame)
               this.stompClient.subscribe(stompconfig.transactionsTopic, tick => {
-                console.log("tick:", tick)
-                console.log("body:" , tick.body)
                 var transaction = JSON.parse(tick.body)
-                var transtrans = JSON.parse(transaction.transaction)
-                console.log("transaciton:" , transtrans)
-                console.log("id:", transtrans.id)
-                vm.items.unshift(transtrans)
+                var transactionObject = JSON.parse(transaction.transaction)
+                vm.items.unshift(transactionObject)
+                vm.account = transactionObject.toAccount
+                vm.balance = transactionObject.balanceAfter
               })
             },
             error => {
-              console.log("err", error)
+              console.log("Error connecting via stomp", error)
               this.connected = false
             })
 

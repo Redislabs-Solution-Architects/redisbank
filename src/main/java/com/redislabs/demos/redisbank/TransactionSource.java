@@ -12,6 +12,5 @@ public class TransactionSource {
     private String fromAccountName;
     private String description;
     private String type;
-    
 
 }

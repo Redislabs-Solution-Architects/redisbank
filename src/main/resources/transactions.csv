@@ -1,8 +1,0 @@
-id,fromAccountName,amount,description,transactionDate,transactionType
-1,Picnic,-156.13,Delivery of groceries,2021-01-01,Online payment
-2,BMW FS,-565.21,Monthly car lease,2021-01-01,Online payment
-3,Aegon Mortgages,-1289.53,Monthly mortgage payment,2021-01-01,Authorised payment
-4,Starbucks,-12.91,Coffee,2021-01-01,Contactless payment
-5,H&M,112.41,Clothing,2021-01-01,Contactless payment
-6,CZ Insurance,349.51,Monthly health insurance,2021-01-01,Authorised payment
-7,Shell,89.63,Fuel,2021-01-01,Contactless payment

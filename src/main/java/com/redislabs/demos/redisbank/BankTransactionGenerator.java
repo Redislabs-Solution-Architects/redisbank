@@ -3,6 +3,9 @@ package com.redislabs.demos.redisbank;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.DateFormat;
+import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -25,12 +28,15 @@ import io.lettuce.core.RedisCommandExecutionException;
 public class BankTransactionGenerator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BankTransactionGenerator.class);
+    private static Double balance = 100000.00;
     private static final int TRANSACTION_RATE_MS = 10000;
     private static final String TRANSACTION_KEY = "transaction";
     private static final String TRANSACTIONS_STREAM = "transactions";
     private static final String TRANSACTIONS_INDEX = "transaction_idx";
     private final List<TransactionSource> transactionSources;
     private final SecureRandom random;
+    private final DateFormat df = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss");
+    private final NumberFormat nf = NumberFormat.getCurrencyInstance();
 
     private final StringRedisTemplate redis;
     private final StatefulRediSearchConnection<String, String> connection;
@@ -40,22 +46,12 @@ public class BankTransactionGenerator {
 
         this.redis = redis;
         this.connection = connection;
-        transactionSources = CsvUtil.loadObjectList(TransactionSource.class, "transaction_sources.csv");
+        transactionSources = SerializationUtil.loadObjectList(TransactionSource.class, "transaction_sources.csv");
         random = SecureRandom.getInstance("SHA1PRNG");
-        random.setSeed("lars".getBytes("UTF-8"));
+        random.setSeed("lars".getBytes("UTF-8")); // Prime the RNG so it always generates the same pseudorandom set
 
         createSearchIndices();
-
-        // Don't cross the streams! ;)
-        redis.delete(TRANSACTIONS_STREAM);
-        List<BankTransaction> transactions = CsvUtil.loadObjectList(BankTransaction.class, "transactions.csv");
-        for (BankTransaction bankTransaction : transactions) {
-            bankTransaction.setToAccountName("lars");
-            bankTransaction.setToAccount(FakeIbanUtil.generateFakeIbanFrom("lars"));
-            bankTransaction.setFromAccount(FakeIbanUtil.generateFakeIbanFrom(bankTransaction.getFromAccountName()));
-            updateBankTransactions(bankTransaction);
-        }
-        ;
+        createInitialStream();
 
     }
 
@@ -73,17 +69,26 @@ public class BankTransactionGenerator {
         commands.create(TRANSACTIONS_INDEX, Field.text("toAccountName").build());
     }
 
-    @Scheduled(fixedDelay = TRANSACTION_RATE_MS)
-    public void generateNewTransaction() {
-        BankTransaction bankTransaction = generateBankTransaction();
-        updateBankTransactions(bankTransaction);
+    private void createInitialStream() {
+        redis.delete(TRANSACTIONS_STREAM);
+        for (int i = 0; i < 10; i++) {
+            BankTransaction bankTransaction = createBankTransaction();
+            streamBankTransaction(bankTransaction);
+        }
+        ;
     }
 
-    private void updateBankTransactions(BankTransaction bankTransaction) {
+    @Scheduled(fixedDelay = TRANSACTION_RATE_MS)
+    public void generateNewTransaction() {
+        BankTransaction bankTransaction = createBankTransaction();
+        streamBankTransaction(bankTransaction);
+    }
+
+    private void streamBankTransaction(BankTransaction bankTransaction) {
         Map<String, String> update = new HashMap<>();
         String transactionString;
         try {
-            transactionString = CsvUtil.serializeObject(bankTransaction);
+            transactionString = SerializationUtil.serializeObject(bankTransaction);
             LOGGER.info("Update: {}", transactionString);
             update.put(TRANSACTION_KEY, transactionString);
             redis.opsForStream().add(TRANSACTIONS_STREAM, update);
@@ -92,7 +97,7 @@ public class BankTransactionGenerator {
         }
     }
 
-    private BankTransaction generateBankTransaction() {
+    private BankTransaction createBankTransaction() {
         BankTransaction transaction = new BankTransaction();
         transaction.setId(random.nextLong());
         transaction.setToAccountName("lars");
@@ -102,12 +107,18 @@ public class BankTransactionGenerator {
         transaction.setFromAccount(FakeIbanUtil.generateFakeIbanFrom(ts.getFromAccountName()));
         transaction.setDescription(ts.getDescription());
         transaction.setTransactionType(ts.getType());
+        transaction.setAmount(createTransactionAmount());
+        transaction.setTransactionDate(df.format(new Date()));
+        transaction.setBalanceAfter(nf.format(balance));
+        return transaction;
+    }
+
+    private String createTransactionAmount() {
         Double bandwidth = (1 + random.nextInt(3)) * 100.00;
         Double amount = random.nextDouble() * bandwidth % 300.0;
         Double roundedAmount = Math.floor(amount * 100) / 100;
-        transaction.setAmount(roundedAmount);
-        transaction.setTransactionDate(new Date());
-        return transaction;
+        balance = balance - roundedAmount;
+        return nf.format(roundedAmount);
     }
 
 }

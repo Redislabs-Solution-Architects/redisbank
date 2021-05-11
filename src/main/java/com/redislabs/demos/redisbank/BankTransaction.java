@@ -1,7 +1,5 @@
 package com.redislabs.demos.redisbank;
 
-import java.util.Date;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
@@ -21,9 +19,10 @@ public class BankTransaction {
     private String fromAccountName;
     private String toAccount;
     private String toAccountName;
-    private Double amount;
+    private String amount;
     private String description;
-    private Date transactionDate;
+    private String transactionDate;
     private String transactionType;
+    private String balanceAfter;
 
 }
