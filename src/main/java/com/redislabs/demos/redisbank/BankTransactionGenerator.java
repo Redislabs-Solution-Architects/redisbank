@@ -72,7 +72,9 @@ public class BankTransactionGenerator {
         commands.create(ACCOUNT_INDEX, Field.text("toAccountName").build());
 
         LOGGER.info("Creating {} index", SEARCH_INDEX);
-        commands.create(SEARCH_INDEX, Field.text("description").matcher(PhoneticMatcher.English).build(), Field.text("toAccountName").matcher(PhoneticMatcher.English).build());
+        commands.create(SEARCH_INDEX, Field.text("description").matcher(PhoneticMatcher.English).build(),
+                Field.text("fromAccountName").matcher(PhoneticMatcher.English).build(),
+                Field.text("transactionType").matcher(PhoneticMatcher.English).build());
     }
 
     private void createInitialStream() {

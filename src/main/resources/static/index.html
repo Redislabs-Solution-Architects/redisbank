@@ -472,11 +472,11 @@
                                         <tr class="searchtable-item" v-for="searchitem in searchitems"
                                             :key="searchitem.id">
                                             <td>{{ searchitem.transactionDate }}</td>
-                                            <td>{{ searchitem.fromAccountName }}</td>
+                                            <td><span v-html="searchitem.fromAccountName"></span></td>
                                             <td>{{ searchitem.fromAccount }}</td>
-                                            <td>{{ searchitem.description }}</td>
+                                            <td><span v-html="searchitem.description"></span></td>
                                             <td>{{ searchitem.amount }}</td>
-                                            <td>{{ searchitem.transactionType }}</td>
+                                            <td><span v-html="searchitem.transactionType"></span></td>
                                         </tr>
                                     </tbody>
                                 </table>

@@ -16,6 +16,7 @@ var transactionsOverview = new Vue({
   watch: {
     // whenever question changes, this function will run
     question: function (newQuestion, oldQuestion) {
+      this.searchitems = []
       this.debouncedGetAnswer()
     }
   },
@@ -68,7 +69,13 @@ var transactionsOverview = new Vue({
         })
     },
     getAnswer: function()  {
-      var searchUrl = '/api/search?term=' + this.question + '*'
+
+      var searchTerm = this.question
+      if (this.question.length > 0) {
+        searchTerm = searchTerm + '*'
+      }
+
+      var searchUrl = '/api/search?term=' + searchTerm
       var vm = this
       axios.get(searchUrl)
         .then(function (response) {

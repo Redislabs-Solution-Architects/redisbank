@@ -2,6 +2,9 @@ package com.redislabs.demos.redisbank;
 
 import com.redislabs.demos.redisbank.Config.StompConfig;
 import com.redislabs.lettusearch.RediSearchCommands;
+import com.redislabs.lettusearch.SearchOptions;
+import com.redislabs.lettusearch.SearchOptions.Highlight;
+import com.redislabs.lettusearch.SearchOptions.Highlight.Tag;
 import com.redislabs.lettusearch.SearchResults;
 import com.redislabs.lettusearch.StatefulRediSearchConnection;
 
@@ -45,7 +48,13 @@ public class TransactionOverviewController {
     @GetMapping("/search")
     public SearchResults<String, String> searchTransactions(@RequestParam("term") String term) {
         RediSearchCommands<String, String> commands = srsc.sync();
-        SearchResults<String, String> results = commands.search(SEARCH_INDEX, term);
+
+        SearchOptions options = SearchOptions
+                .builder().highlight(Highlight.builder().field("description").field("fromAccountName")
+                        .field("transactionType").tag(Tag.builder().open("<mark>").close("</mark>").build()).build())
+                .build();
+
+        SearchResults<String, String> results = commands.search(SEARCH_INDEX, term, options);
         return results;
     }
 
