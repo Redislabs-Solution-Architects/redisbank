@@ -24,14 +24,12 @@ public class TransactionOverviewController {
 
     private final Config config;
     private final UserSessionRepository userSessionRepository;
-    private final BankTransactionRepository btr;
     private final StatefulRediSearchConnection<String, String> srsc;
 
     public TransactionOverviewController(Config config, UserSessionRepository userSessionRepository,
-            BankTransactionRepository btr, StatefulRediSearchConnection<String, String> srsc) {
+            StatefulRediSearchConnection<String, String> srsc) {
         this.config = config;
         this.userSessionRepository = userSessionRepository;
-        this.btr = btr;
         this.srsc = srsc;
     }
 
@@ -46,6 +44,7 @@ public class TransactionOverviewController {
     }
 
     @GetMapping("/search")
+    @SuppressWarnings("all")
     public SearchResults<String, String> searchTransactions(@RequestParam("term") String term) {
         RediSearchCommands<String, String> commands = srsc.sync();
 

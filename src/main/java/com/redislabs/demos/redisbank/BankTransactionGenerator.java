@@ -57,6 +57,7 @@ public class BankTransactionGenerator {
 
     }
 
+    @SuppressWarnings("unchecked")
     private void createSearchIndices() {
         RediSearchCommands<String, String> commands = connection.sync();
         try {
