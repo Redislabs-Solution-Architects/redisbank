@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin
 public class TransactionOverviewController {
 
-    private static final String TRANSACTIONS_INDEX = "transaction_idx";
+    private static final String ACCOUNT_INDEX = "transaction_account_idx";
+    private static final String SEARCH_INDEX = "transaction_description_idx";
 
     private final Config config;
     private final UserSessionRepository userSessionRepository;
@@ -36,20 +37,22 @@ public class TransactionOverviewController {
         return config.getStomp();
     }
 
-    @GetMapping("/search")
-    public SearchResults<String, String> findTransactionsBy(String criteria) {
-        return null;
-    }
-
     @GetMapping("/list")
     public SearchResults<String, String> listTransactionsByDate() {
         return null;
     }
 
+    @GetMapping("/search")
+    public SearchResults<String, String> searchTransactions(@RequestParam("term") String term) {
+        RediSearchCommands<String, String> commands = srsc.sync();
+        SearchResults<String, String> results = commands.search(SEARCH_INDEX, term);
+        return results;
+    }
+
     @GetMapping("/transactions")
     public SearchResults<String, String> listTransactions() {
         RediSearchCommands<String, String> commands = srsc.sync();
-        SearchResults<String, String> results = commands.search(TRANSACTIONS_INDEX, "lars");
+        SearchResults<String, String> results = commands.search(ACCOUNT_INDEX, "lars");
         return results;
     }
 

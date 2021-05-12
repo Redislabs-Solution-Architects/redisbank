@@ -5,11 +5,22 @@ var transactionsOverview = new Vue({
     received_messages: [],
     connected: false,
     account: 'bar',
-    balance: ''
+    balance: '',
+    question: '',
+    searchitems: []
   },
   mounted() {
     this.getTransactions()
     this.connect()
+  },
+  watch: {
+    // whenever question changes, this function will run
+    question: function (newQuestion, oldQuestion) {
+      this.debouncedGetAnswer()
+    }
+  },
+  created: function () {
+    this.debouncedGetAnswer = _.debounce(this.getAnswer, 100)
   },
   methods: {
     getTransactions: function () {
@@ -25,7 +36,6 @@ var transactionsOverview = new Vue({
           console.log('Error! Could not reach the API. ' + error)
         })
     },
-
     connect: function () {
       var vm = this
       var stompConfigUrl = '/api/config/stomp'
@@ -56,6 +66,17 @@ var transactionsOverview = new Vue({
         .catch(function (error) {
           console.log('Error fetching stomp config.' + error)
         })
+    },
+    getAnswer: function()  {
+      var searchUrl = '/api/search?term=' + this.question + '*'
+      var vm = this
+      axios.get(searchUrl)
+        .then(function (response) {
+          vm.searchitems = response.data
+        })
+        .catch(function (error) {
+          console.log('Error! Could not reach the API. ' + error)
+        })      
     }
 
   }

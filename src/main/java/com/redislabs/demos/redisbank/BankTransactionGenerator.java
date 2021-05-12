@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.redislabs.lettusearch.Field;
 import com.redislabs.lettusearch.RediSearchCommands;
 import com.redislabs.lettusearch.StatefulRediSearchConnection;
+import com.redislabs.lettusearch.Field.Text.PhoneticMatcher;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,8 @@ public class BankTransactionGenerator {
     private static final int TRANSACTION_RATE_MS = 10000;
     private static final String TRANSACTION_KEY = "transaction";
     private static final String TRANSACTIONS_STREAM = "transactions";
-    private static final String TRANSACTIONS_INDEX = "transaction_idx";
+    private static final String ACCOUNT_INDEX = "transaction_account_idx";
+    private static final String SEARCH_INDEX = "transaction_description_idx";
     private final List<TransactionSource> transactionSources;
     private final SecureRandom random;
     private final DateFormat df = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss");
@@ -58,15 +60,19 @@ public class BankTransactionGenerator {
     private void createSearchIndices() {
         RediSearchCommands<String, String> commands = connection.sync();
         try {
-            commands.dropIndex(TRANSACTIONS_INDEX);
+            commands.dropIndex(ACCOUNT_INDEX);
+            commands.dropIndex(SEARCH_INDEX);
         } catch (RedisCommandExecutionException e) {
             if (!e.getMessage().equals("Unknown Index name")) {
                 LOGGER.error("Error dropping index: {}", e.getMessage());
                 throw new RuntimeException(e);
             }
         }
-        LOGGER.info("Creating {} index", TRANSACTIONS_INDEX);
-        commands.create(TRANSACTIONS_INDEX, Field.text("toAccountName").build());
+        LOGGER.info("Creating {} index", ACCOUNT_INDEX);
+        commands.create(ACCOUNT_INDEX, Field.text("toAccountName").build());
+
+        LOGGER.info("Creating {} index", SEARCH_INDEX);
+        commands.create(SEARCH_INDEX, Field.text("description").matcher(PhoneticMatcher.English).build(), Field.text("toAccountName").matcher(PhoneticMatcher.English).build());
     }
 
     private void createInitialStream() {
