@@ -1,21 +1,32 @@
-.mytable-item {
+.trtable-item {
     transition: all 0.5s;
   }
-  .mytable-item > * {
+  .trtable-item > * {
     transition: all 0.5s;
     overflow: hidden;
   }
-  .mytable-enter {
+  .trtable-enter {
     opacity: 0;
   }
-  .mytable-enter-active {
+  .trtable-enter-active {
     opacity: 0;
   }
-  .mytable-enter-to {
+  .trtable-enter-to {
     opacity: 0;
     background-color: green;
   }
-  .mytable-enter > * {
+  .trtable-enter > * {
     padding-top: 0px !important;
     padding-bottom: 0px !important;
   }
+
+  .balance-enter-active  {
+    transition: all 1s;
+    color: green;
+  }
+
+  .balance-enter  {
+    opacity: 0;
+    color: green;
+  }
+  

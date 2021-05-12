@@ -4,7 +4,8 @@ var transactionsOverview = new Vue({
     items: [],
     received_messages: [],
     connected: false,
-    account: 'bar'
+    account: 'bar',
+    balance: ''
   },
   mounted() {
     this.getTransactions()
