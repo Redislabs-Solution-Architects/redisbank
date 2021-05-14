@@ -13,9 +13,10 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.redislabs.lettusearch.Field;
+import com.redislabs.lettusearch.Field.Text.PhoneticMatcher;
 import com.redislabs.lettusearch.RediSearchCommands;
 import com.redislabs.lettusearch.StatefulRediSearchConnection;
-import com.redislabs.lettusearch.Field.Text.PhoneticMatcher;
+import com.redislabs.redistimeseries.RedisTimeSeries;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +36,7 @@ public class BankTransactionGenerator {
     private static final String TRANSACTIONS_STREAM = "transactions";
     private static final String ACCOUNT_INDEX = "transaction_account_idx";
     private static final String SEARCH_INDEX = "transaction_description_idx";
+    private static final String BALANCE_TS = "balance_ts";
     private final List<TransactionSource> transactionSources;
     private final SecureRandom random;
     private final DateFormat df = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss");
@@ -42,17 +44,19 @@ public class BankTransactionGenerator {
 
     private final StringRedisTemplate redis;
     private final StatefulRediSearchConnection<String, String> connection;
+    private final RedisTimeSeries rts;
 
-    public BankTransactionGenerator(StringRedisTemplate redis, StatefulRediSearchConnection<String, String> connection)
-            throws NoSuchAlgorithmException, UnsupportedEncodingException {
-
+    public BankTransactionGenerator(StringRedisTemplate redis, StatefulRediSearchConnection<String, String> connection,
+            RedisTimeSeries rts) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         this.redis = redis;
         this.connection = connection;
+        this.rts = rts;
         transactionSources = SerializationUtil.loadObjectList(TransactionSource.class, "transaction_sources.csv");
         random = SecureRandom.getInstance("SHA1PRNG");
         random.setSeed("lars".getBytes("UTF-8")); // Prime the RNG so it always generates the same pseudorandom set
 
         createSearchIndices();
+        createTimeSeries();
         createInitialStream();
 
     }
@@ -76,6 +80,11 @@ public class BankTransactionGenerator {
         commands.create(SEARCH_INDEX, Field.text("description").matcher(PhoneticMatcher.English).build(),
                 Field.text("fromAccountName").matcher(PhoneticMatcher.English).build(),
                 Field.text("transactionType").matcher(PhoneticMatcher.English).build());
+    }
+
+    private void createTimeSeries() {
+        redis.delete(BALANCE_TS);
+        rts.create(BALANCE_TS, 0, null);
     }
 
     private void createInitialStream() {
@@ -127,6 +136,7 @@ public class BankTransactionGenerator {
         Double amount = random.nextDouble() * bandwidth % 300.0;
         Double roundedAmount = Math.floor(amount * 100) / 100;
         balance = balance - roundedAmount;
+        rts.add(BALANCE_TS, balance);
         return nf.format(roundedAmount);
     }
 

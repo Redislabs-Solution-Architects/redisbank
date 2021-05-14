@@ -11,7 +11,7 @@ Via RedisCDC these changes will appear in demo application #1.
 # Getting Started
 
 1. Checkout the project
-2. `docker run -p 6379:6379 redislabs/redisearch:latest`
+2. `docker run -p 6379:6379 redislabs/redismod:latest`
 3. `./mvnw clean package spring-boot:run`
 4. Navigate to http://localhost:8080 and login with user lars and password larsje
 5. Watch in awe (or horror ;))
