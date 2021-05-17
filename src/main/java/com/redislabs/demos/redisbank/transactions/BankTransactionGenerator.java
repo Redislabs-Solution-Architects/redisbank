@@ -1,4 +1,4 @@
-package com.redislabs.demos.redisbank;
+package com.redislabs.demos.redisbank.transactions;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.redislabs.demos.redisbank.Utilities;
+import com.redislabs.demos.redisbank.SerializationUtil;
 import com.redislabs.lettusearch.Field;
 import com.redislabs.lettusearch.Field.Text.PhoneticMatcher;
 import com.redislabs.lettusearch.RediSearchCommands;
@@ -119,10 +121,10 @@ public class BankTransactionGenerator {
         BankTransaction transaction = new BankTransaction();
         transaction.setId(random.nextLong());
         transaction.setToAccountName("lars");
-        transaction.setToAccount(FakeIbanUtil.generateFakeIbanFrom("lars"));
+        transaction.setToAccount(Utilities.generateFakeIbanFrom("lars"));
         TransactionSource ts = transactionSources.get(random.nextInt(transactionSources.size()));
         transaction.setFromAccountName(ts.getFromAccountName());
-        transaction.setFromAccount(FakeIbanUtil.generateFakeIbanFrom(ts.getFromAccountName()));
+        transaction.setFromAccount(Utilities.generateFakeIbanFrom(ts.getFromAccountName()));
         transaction.setDescription(ts.getDescription());
         transaction.setTransactionType(ts.getType());
         transaction.setAmount(createTransactionAmount());

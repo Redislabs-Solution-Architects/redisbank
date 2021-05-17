@@ -4,7 +4,7 @@ import java.security.SecureRandom;
 
 import io.micrometer.core.instrument.util.StringUtils;
 
-public class FakeIbanUtil {
+public class Utilities {
 
     /**
      * Fake IBAN generator. Generates a Dutch IBAN with 17 digits of which the

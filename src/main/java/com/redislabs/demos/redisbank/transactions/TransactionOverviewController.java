@@ -1,5 +1,9 @@
-package com.redislabs.demos.redisbank;
+package com.redislabs.demos.redisbank.transactions;
 
+import com.redislabs.demos.redisbank.Config;
+import com.redislabs.demos.redisbank.Utilities;
+import com.redislabs.demos.redisbank.UserSession;
+import com.redislabs.demos.redisbank.UserSessionRepository;
 import com.redislabs.demos.redisbank.Config.StompConfig;
 import com.redislabs.lettusearch.RediSearchCommands;
 import com.redislabs.lettusearch.SearchOptions;
@@ -66,7 +70,7 @@ public class TransactionOverviewController {
 
     @GetMapping(value = "/login")
     public void login(@RequestParam String userName) {
-        String accountNumber = FakeIbanUtil.generateFakeIbanFrom(userName);
+        String accountNumber = Utilities.generateFakeIbanFrom(userName);
         UserSession userSession = new UserSession(userName, accountNumber);
         userSessionRepository.save(userSession);
 

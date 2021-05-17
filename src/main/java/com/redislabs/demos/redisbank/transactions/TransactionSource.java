@@ -1,4 +1,4 @@
-package com.redislabs.demos.redisbank;
+package com.redislabs.demos.redisbank.transactions;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

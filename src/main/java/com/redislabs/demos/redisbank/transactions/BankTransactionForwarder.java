@@ -1,8 +1,10 @@
-package com.redislabs.demos.redisbank;
+package com.redislabs.demos.redisbank.transactions;
 
 import java.time.Duration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.redislabs.demos.redisbank.Config;
+import com.redislabs.demos.redisbank.SerializationUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

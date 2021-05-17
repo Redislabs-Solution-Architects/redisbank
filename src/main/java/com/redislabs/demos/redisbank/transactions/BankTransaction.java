@@ -1,4 +1,4 @@
-package com.redislabs.demos.redisbank;
+package com.redislabs.demos.redisbank.transactions;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;

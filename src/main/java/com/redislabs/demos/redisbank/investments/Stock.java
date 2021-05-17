@@ -1,4 +1,4 @@
-package com.redislabs.demos.redisbank;
+package com.redislabs.demos.redisbank.investments;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
@@ -11,11 +11,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @RedisHash
-public class BankAccount {
-
+public class Stock {
+    
     @Id
-    private Long id;
-    private String account;
-    private String accountHolder;
-    private String accountType;
+    private long id;
+    private String name;
+    private String price;
 }
