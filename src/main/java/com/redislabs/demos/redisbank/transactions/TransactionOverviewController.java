@@ -1,16 +1,18 @@
 package com.redislabs.demos.redisbank.transactions;
 
 import com.redislabs.demos.redisbank.Config;
-import com.redislabs.demos.redisbank.Utilities;
+import com.redislabs.demos.redisbank.Config.StompConfig;
 import com.redislabs.demos.redisbank.UserSession;
 import com.redislabs.demos.redisbank.UserSessionRepository;
-import com.redislabs.demos.redisbank.Config.StompConfig;
+import com.redislabs.demos.redisbank.Utilities;
 import com.redislabs.lettusearch.RediSearchCommands;
 import com.redislabs.lettusearch.SearchOptions;
 import com.redislabs.lettusearch.SearchOptions.Highlight;
 import com.redislabs.lettusearch.SearchOptions.Highlight.Tag;
 import com.redislabs.lettusearch.SearchResults;
 import com.redislabs.lettusearch.StatefulRediSearchConnection;
+import com.redislabs.redistimeseries.RedisTimeSeries;
+import com.redislabs.redistimeseries.Value;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,16 +27,19 @@ public class TransactionOverviewController {
 
     private static final String ACCOUNT_INDEX = "transaction_account_idx";
     private static final String SEARCH_INDEX = "transaction_description_idx";
+    private static final String BALANCE_TS = "balance_ts";
 
     private final Config config;
     private final UserSessionRepository userSessionRepository;
     private final StatefulRediSearchConnection<String, String> srsc;
+    private final RedisTimeSeries rts;
 
     public TransactionOverviewController(Config config, UserSessionRepository userSessionRepository,
-            StatefulRediSearchConnection<String, String> srsc) {
+            StatefulRediSearchConnection<String, String> srsc, RedisTimeSeries rts) {
         this.config = config;
         this.userSessionRepository = userSessionRepository;
         this.srsc = srsc;
+        this.rts = rts;
     }
 
     @GetMapping("/config/stomp")
@@ -42,9 +47,10 @@ public class TransactionOverviewController {
         return config.getStomp();
     }
 
-    @GetMapping("/list")
-    public SearchResults<String, String> listTransactionsByDate() {
-        return null;
+    @GetMapping("/balance")
+    public Value[] listTransactionsByDate() {
+        Value[] tsValues = rts.range(BALANCE_TS, System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 7), System.currentTimeMillis());
+        return tsValues;
     }
 
     @GetMapping("/search")

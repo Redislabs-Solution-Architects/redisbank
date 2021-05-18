@@ -83,30 +83,35 @@
                 <section id="basic-horizontal-layouts">
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">Checking account {{ account }}</h4>
-                        </div>
-                        <div class="card-content">
-                            <div class="card-body">
-                                <form class="form">
-                                    <div class="row">
-                                        <div class="col-md-6 col-12">
-                                            <div class="form-group">
-                                                <label for="first-name-column">Account holder:</label>
-                                                <label>L.S. Rosenquist in Nieuwegein, The Netherlands</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6 col-12">
-                                            <div class="form-group">
-                                                <label for="last-name-column"></label>Balance:</label>
-                                                <transition name="balance"><label :key="balance">{{ balance }}</label>
-                                                </transition>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </form>
+                            <div class="row">
+                                <div class="col-md-6 col-12">
+                                    <h4 class="card-title">Checking account {{ account }}</h4>
+                                </div>
+                                <div class="col-md-6 col-12">
+                                    <h4 class="card-title">Account holder: L.S. Rosenquist, Nieuwegein, The Netherlands
+                                    </h4>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Balance over time</h4>
+                        </div>
+                        <div class="card-content">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6 col-12">
+                                        Current balance: {{ balance }}
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                    </div>
+                                </div>
+                                <div id="area"></div>
+                            </div>
+                        </div>
+                    </div>
+
                 </section>
                 <section>
                     <div class="card">
@@ -211,6 +216,9 @@
             </footer>
         </div>
     </div>
+    <link rel="stylesheet" href="assets/vendors/apexcharts/apexcharts.css">
+    <script src="assets/vendors/dayjs/dayjs.min.js"></script>
+    <script src="assets/vendors/apexcharts/apexcharts.js"></script>
     <script src="assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
     <script src="assets/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
