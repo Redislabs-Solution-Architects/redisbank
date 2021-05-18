@@ -92,20 +92,27 @@
                                     </h4>
                                 </div>
                             </div>
+                            <div class="row">
+                                <div class="col-md-6 col-12">
+                                    Current balance: {{ balance }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="card">
                         <div class="card-header">
-                            <h4 class="card-title">Balance over time</h4>
+                            <h4 class="card-title">How is my money doing?</h4>
                         </div>
                         <div class="card-content">
                             <div class="card-body">
                                 <div class="row">
                                     <div class="col-md-6 col-12">
-                                        Current balance: {{ balance }}
+                                        Balance over time
                                         <div id="area"></div>
                                     </div>
                                     <div class="col-md-6 col-12">
+                                        Where is my money going?
+                                        <div id="chart"></div>
                                     </div>
                                 </div>
                             </div>

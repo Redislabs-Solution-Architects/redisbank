@@ -124,3 +124,26 @@ axios.get("/api/balance")
   .catch(function (error) {
     console.log('Error! Could not reach the API. ' + error)
   })
+
+var options = {
+  series: [44, 55, 13, 43, 22],
+  chart: {
+    height: 350,
+    type: 'pie',
+  },
+  labels: ['Starbucks', 'Shell', 'BMW FS', 'Picnic', 'H&M'],
+  responsive: [{
+    breakpoint: 480,
+    options: {
+      chart: {
+        width: 200
+      },
+      legend: {
+        position: 'bottom'
+      }
+    }
+  }]
+};
+
+var chart = new ApexCharts(document.querySelector("#chart"), options);
+chart.render();
