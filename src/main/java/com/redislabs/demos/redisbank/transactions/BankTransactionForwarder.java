@@ -45,10 +45,10 @@ public class BankTransactionForwarder
     @Override
     public void afterPropertiesSet() throws Exception {
         this.container = StreamMessageListenerContainer.create(redis.getConnectionFactory(),
-                StreamMessageListenerContainerOptions.builder().pollTimeout(Duration.ofMillis(100)).build());
+                StreamMessageListenerContainerOptions.builder().pollTimeout(Duration.ofMillis(1000)).build());
         container.start();
         this.subscription = container.receive(StreamOffset.latest(TRANSACTIONS_STREAM), this);
-        subscription.await(Duration.ofSeconds(2));
+        subscription.await(Duration.ofSeconds(10));
     }
 
     @Override
