@@ -109,9 +109,9 @@ public class BankTransactionGenerator {
         String transactionString;
         try {
             transactionString = SerializationUtil.serializeObject(bankTransaction);
-            LOGGER.info("Update: {}", transactionString);
             update.put(TRANSACTION_KEY, transactionString);
             redis.opsForStream().add(TRANSACTIONS_STREAM, update);
+            LOGGER.info("Update: {}", transactionString);
         } catch (JsonProcessingException e) {
             LOGGER.error("Error serialising object to JSON", e.getMessage());
         }
@@ -137,7 +137,12 @@ public class BankTransactionGenerator {
         Double bandwidth = (1 + random.nextInt(3)) * 100.00;
         Double amount = random.nextDouble() * bandwidth % 300.0;
         Double roundedAmount = Math.floor(amount * 100) / 100;
-        balance = balance - roundedAmount;
+
+        if (random.nextBoolean())   {
+            roundedAmount = roundedAmount * -1.00;
+        }
+
+        balance = balance + roundedAmount;
         rts.add(BALANCE_TS, balance);
         return nf.format(roundedAmount);
     }

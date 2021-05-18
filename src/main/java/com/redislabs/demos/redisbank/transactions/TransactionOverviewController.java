@@ -48,9 +48,17 @@ public class TransactionOverviewController {
     }
 
     @GetMapping("/balance")
-    public Value[] listTransactionsByDate() {
-        Value[] tsValues = rts.range(BALANCE_TS, System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 7), System.currentTimeMillis());
-        return tsValues;
+    public Balance[] listTransactionsByDate() {
+        Value[] tsValues = rts.range(BALANCE_TS, System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 7),
+                System.currentTimeMillis());
+
+        Balance[] balanceTs = new Balance[tsValues.length];
+
+        for (int i = 0; i < tsValues.length; i++) {
+            balanceTs[i] = new Balance(tsValues[i]);
+        }
+
+        return balanceTs;
     }
 
     @GetMapping("/search")

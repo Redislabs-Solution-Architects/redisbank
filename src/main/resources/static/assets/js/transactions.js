@@ -90,12 +90,13 @@ var transactionsOverview = new Vue({
 })
 
 var areaOptions = {
-  series: [
-    {
-      name: "Balance over time",
-      data: [31, 40, 28, 51, 42, 109, 100],
-    }
-  ],
+  series: [],
+  xaxis: {
+    type: "datetime",
+  },
+  yaxis: {
+    decimalsInFloat: 2
+  },
   chart: {
     height: 350,
     type: "area",
@@ -106,24 +107,20 @@ var areaOptions = {
   stroke: {
     curve: "smooth",
   },
-  xaxis: {
-    type: "datetime",
-    categories: [
-      "2018-09-19T00:00:00.000Z",
-      "2018-09-19T01:30:00.000Z",
-      "2018-09-19T02:30:00.000Z",
-      "2018-09-19T03:30:00.000Z",
-      "2018-09-19T04:30:00.000Z",
-      "2018-09-19T05:30:00.000Z",
-      "2018-09-19T06:30:00.000Z",
-    ],
-  },
-  tooltip: {
-    x: {
-      format: "dd/MM/yy HH:mm",
-    },
-  },
+  noData: {
+    text: 'Loading...'
+  }
 };
 
 var area = new ApexCharts(document.querySelector("#area"), areaOptions);
 area.render();
+axios.get("/api/balance")
+  .then(function (response) {
+    area.updateSeries([{
+      name: 'value',
+      data: response.data
+    }])
+  })
+  .catch(function (error) {
+    console.log('Error! Could not reach the API. ' + error)
+  })
