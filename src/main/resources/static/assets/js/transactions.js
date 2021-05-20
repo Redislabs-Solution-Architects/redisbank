@@ -125,18 +125,24 @@ axios.get("/api/balance")
     console.log('Error! Could not reach the API. ' + error)
   })
 
-var options = {
-  series: [44, 55, 13, 43, 22],
+var pieOptions = {
+  series: [1,2,3,4,5],
   chart: {
     height: 350,
-    type: 'pie',
+    type: 'donut',
+    options: {
+      chart: {
+        id: "chart-id"
+      }
+    }
   },
-  labels: ['Starbucks', 'Shell', 'BMW FS', 'Picnic', 'H&M'],
+  labels: ['a','b','c','d','e'],
   responsive: [{
     breakpoint: 480,
     options: {
       chart: {
-        width: 200
+        width: 200,
+        id: "chart-id"
       },
       legend: {
         position: 'bottom'
@@ -145,5 +151,18 @@ var options = {
   }]
 };
 
-var chart = new ApexCharts(document.querySelector("#chart"), options);
-chart.render();
+axios.get("/api/biggestspenders")
+  .then(function (response) {
+
+    pieOptions.series = response.data.series
+    pieOptions.labels = response.data.labels
+
+    console.log('pieooptons', pieOptions)
+
+    var chart = new ApexCharts(document.querySelector("#chart"), pieOptions);
+    chart.render()
+    
+  })
+  .catch(function (error) {
+    console.log('Error! Could not reach the API. ' + error)
+  })

@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.redislabs.demos.redisbank.Utilities;
 import com.redislabs.demos.redisbank.SerializationUtil;
+import com.redislabs.demos.redisbank.Utilities;
 import com.redislabs.lettusearch.Field;
 import com.redislabs.lettusearch.Field.Text.PhoneticMatcher;
 import com.redislabs.lettusearch.RediSearchCommands;
@@ -39,6 +39,7 @@ public class BankTransactionGenerator {
     private static final String ACCOUNT_INDEX = "transaction_account_idx";
     private static final String SEARCH_INDEX = "transaction_description_idx";
     private static final String BALANCE_TS = "balance_ts";
+    private static final String SORTED_SET_KEY = "bigspenders";
     private final List<TransactionSource> transactionSources;
     private final SecureRandom random;
     private final DateFormat df = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss");
@@ -58,6 +59,7 @@ public class BankTransactionGenerator {
         random.setSeed("lars".getBytes("UTF-8")); // Prime the RNG so it always generates the same pseudorandom set
 
         createSearchIndices();
+        deleteSortedSet();
         createTimeSeries();
         createInitialStream();
 
@@ -82,6 +84,10 @@ public class BankTransactionGenerator {
         commands.create(SEARCH_INDEX, Field.text("description").matcher(PhoneticMatcher.English).build(),
                 Field.text("fromAccountName").matcher(PhoneticMatcher.English).build(),
                 Field.text("transactionType").matcher(PhoneticMatcher.English).build());
+    }
+
+    private void deleteSortedSet()  {
+        redis.delete(SORTED_SET_KEY);
     }
 
     private void createTimeSeries() {
@@ -111,7 +117,6 @@ public class BankTransactionGenerator {
             transactionString = SerializationUtil.serializeObject(bankTransaction);
             update.put(TRANSACTION_KEY, transactionString);
             redis.opsForStream().add(TRANSACTIONS_STREAM, update);
-            LOGGER.info("Update: {}", transactionString);
         } catch (JsonProcessingException e) {
             LOGGER.error("Error serialising object to JSON", e.getMessage());
         }
@@ -127,13 +132,13 @@ public class BankTransactionGenerator {
         transaction.setFromAccount(Utilities.generateFakeIbanFrom(ts.getFromAccountName()));
         transaction.setDescription(ts.getDescription());
         transaction.setTransactionType(ts.getType());
-        transaction.setAmount(createTransactionAmount());
+        transaction.setAmount(createTransactionAmount(transaction.getFromAccountName()));
         transaction.setTransactionDate(df.format(new Date()));
         transaction.setBalanceAfter(nf.format(balance));
         return transaction;
     }
 
-    private String createTransactionAmount() {
+    private String createTransactionAmount(String accountName) {
         Double bandwidth = (1 + random.nextInt(3)) * 100.00;
         Double amount = random.nextDouble() * bandwidth % 300.0;
         Double roundedAmount = Math.floor(amount * 100) / 100;
@@ -144,6 +149,8 @@ public class BankTransactionGenerator {
 
         balance = balance + roundedAmount;
         rts.add(BALANCE_TS, balance);
+        redis.opsForZSet().incrementScore(SORTED_SET_KEY, accountName, roundedAmount * -1);
+
         return nf.format(roundedAmount);
     }
 
