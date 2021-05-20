@@ -1,18 +1,17 @@
 package com.redislabs.demos.redisbank;
 
-import com.redislabs.redistimeseries.RedisTimeSeries;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import io.lettuce.core.RedisClient;
+import io.lettuce.core.dynamic.RedisCommandFactory;
 
 @Configuration
 public class RedisTimeSeriesConfiguration {
     
     @Bean
-    RedisTimeSeries redisTimeSeries(@Value("${spring.redis.host}") String host, @Value("${spring.redis.port}") int port)  {
-        RedisTimeSeries rts = new RedisTimeSeries(host, port);
-        return rts;
+    RedisCommandFactory redisCommandFactory(RedisClient redis)   {
+        return new RedisCommandFactory(redis.connect());
     }
-
+    
 }

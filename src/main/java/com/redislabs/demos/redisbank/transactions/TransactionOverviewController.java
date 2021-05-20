@@ -1,5 +1,7 @@
 package com.redislabs.demos.redisbank.transactions;
 
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import com.redislabs.demos.redisbank.Config;
@@ -7,15 +9,16 @@ import com.redislabs.demos.redisbank.Config.StompConfig;
 import com.redislabs.demos.redisbank.UserSession;
 import com.redislabs.demos.redisbank.UserSessionRepository;
 import com.redislabs.demos.redisbank.Utilities;
+import com.redislabs.demos.redisbank.timeseries.TimeSeriesCommands;
 import com.redislabs.lettusearch.RediSearchCommands;
 import com.redislabs.lettusearch.SearchOptions;
 import com.redislabs.lettusearch.SearchOptions.Highlight;
 import com.redislabs.lettusearch.SearchOptions.Highlight.Tag;
 import com.redislabs.lettusearch.SearchResults;
 import com.redislabs.lettusearch.StatefulRediSearchConnection;
-import com.redislabs.redistimeseries.RedisTimeSeries;
-import com.redislabs.redistimeseries.Value;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -24,10 +27,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.lettuce.core.dynamic.RedisCommandFactory;
+
 @RestController
 @RequestMapping(path = "/api")
 @CrossOrigin
 public class TransactionOverviewController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionOverviewController.class);
 
     private static final String ACCOUNT_INDEX = "transaction_account_idx";
     private static final String SEARCH_INDEX = "transaction_description_idx";
@@ -37,15 +44,15 @@ public class TransactionOverviewController {
     private final Config config;
     private final UserSessionRepository userSessionRepository;
     private final StatefulRediSearchConnection<String, String> srsc;
-    private final RedisTimeSeries rts;
     private final StringRedisTemplate redis;
+    private final TimeSeriesCommands tsc;
 
     public TransactionOverviewController(Config config, UserSessionRepository userSessionRepository,
-            StatefulRediSearchConnection<String, String> srsc, RedisTimeSeries rts, StringRedisTemplate redis) {
+            StatefulRediSearchConnection<String, String> srsc, RedisCommandFactory rcf, StringRedisTemplate redis) {
         this.config = config;
         this.userSessionRepository = userSessionRepository;
         this.srsc = srsc;
-        this.rts = rts;
+        this.tsc = rcf.getCommands(TimeSeriesCommands.class);
         this.redis = redis;
     }
 
@@ -55,14 +62,18 @@ public class TransactionOverviewController {
     }
 
     @GetMapping("/balance")
-    public Balance[] listTransactionsByDate() {
-        Value[] tsValues = rts.range(BALANCE_TS, System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 7),
+    public Balance[] balance() {
+        Map<String, String> tsValues = tsc.range(BALANCE_TS, System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 7),
                 System.currentTimeMillis());
 
-        Balance[] balanceTs = new Balance[tsValues.length];
+        Balance[] balanceTs = new Balance[tsValues.size()];
+        int i = 0;
 
-        for (int i = 0; i < tsValues.length; i++) {
-            balanceTs[i] = new Balance(tsValues[i]);
+        for (Entry<String, String> entry : tsValues.entrySet()) {
+            Object keyString = entry.getKey();
+            Object valueString = entry.getValue();
+            balanceTs[i] = new Balance(keyString, valueString);
+            i++;
         }
 
         return balanceTs;

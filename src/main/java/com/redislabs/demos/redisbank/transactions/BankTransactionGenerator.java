@@ -14,11 +14,11 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.redislabs.demos.redisbank.SerializationUtil;
 import com.redislabs.demos.redisbank.Utilities;
+import com.redislabs.demos.redisbank.timeseries.TimeSeriesCommands;
 import com.redislabs.lettusearch.Field;
 import com.redislabs.lettusearch.Field.Text.PhoneticMatcher;
 import com.redislabs.lettusearch.RediSearchCommands;
 import com.redislabs.lettusearch.StatefulRediSearchConnection;
-import com.redislabs.redistimeseries.RedisTimeSeries;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +27,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import io.lettuce.core.RedisCommandExecutionException;
+import io.lettuce.core.dynamic.RedisCommandFactory;
 
 @Component
 public class BankTransactionGenerator {
@@ -47,13 +48,13 @@ public class BankTransactionGenerator {
 
     private final StringRedisTemplate redis;
     private final StatefulRediSearchConnection<String, String> connection;
-    private final RedisTimeSeries rts;
+    private final TimeSeriesCommands tsc;
 
     public BankTransactionGenerator(StringRedisTemplate redis, StatefulRediSearchConnection<String, String> connection,
-            RedisTimeSeries rts) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+            RedisCommandFactory rcf) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         this.redis = redis;
         this.connection = connection;
-        this.rts = rts;
+        this.tsc = rcf.getCommands(TimeSeriesCommands.class);
         transactionSources = SerializationUtil.loadObjectList(TransactionSource.class, "transaction_sources.csv");
         random = SecureRandom.getInstance("SHA1PRNG");
         random.setSeed("lars".getBytes("UTF-8")); // Prime the RNG so it always generates the same pseudorandom set
@@ -86,13 +87,13 @@ public class BankTransactionGenerator {
                 Field.text("transactionType").matcher(PhoneticMatcher.English).build());
     }
 
-    private void deleteSortedSet()  {
+    private void deleteSortedSet() {
         redis.delete(SORTED_SET_KEY);
     }
 
     private void createTimeSeries() {
         redis.delete(BALANCE_TS);
-        rts.create(BALANCE_TS, 0, null);
+        tsc.create(BALANCE_TS, 0);
     }
 
     private void createInitialStream() {
@@ -143,12 +144,12 @@ public class BankTransactionGenerator {
         Double amount = random.nextDouble() * bandwidth % 300.0;
         Double roundedAmount = Math.floor(amount * 100) / 100;
 
-        if (random.nextBoolean())   {
+        if (random.nextBoolean()) {
             roundedAmount = roundedAmount * -1.00;
         }
 
         balance = balance + roundedAmount;
-        rts.add(BALANCE_TS, balance);
+        tsc.add(BALANCE_TS, balance);
         redis.opsForZSet().incrementScore(SORTED_SET_KEY, accountName, roundedAmount * -1);
 
         return nf.format(roundedAmount);
