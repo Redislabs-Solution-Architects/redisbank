@@ -7,9 +7,62 @@ var transactionsOverview = new Vue({
     account: 'bar',
     balance: '',
     question: '',
-    searchitems: []
+    searchitems: [],
+    areaOptions : {
+      series: [],
+      xaxis: {
+        type: "datetime",
+      },
+      yaxis: {
+        decimalsInFloat: 2
+      },
+      chart: {
+        height: 350,
+        type: "area",
+      },
+      dataLabels: {
+        enabled: false,
+      },
+      stroke: {
+        curve: "smooth",
+      },
+      noData: {
+        text: 'Loading...'
+      }
+    },
+    areaChart: '',
+    pieOptions : {
+      series: [1, 2, 3, 4, 5],
+      chart: {
+        height: 350,
+        type: 'donut',
+        options: {
+          chart: {
+            id: "chart-id"
+          }
+        }
+      },
+      labels: ['a', 'b', 'c', 'd', 'e'],
+      responsive: [{
+        breakpoint: 480,
+        options: {
+          chart: {
+            width: 200,
+            id: "chart-id"
+          },
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }]
+    },
+    piechart:''
   },
   mounted() {
+    this.areaChart = new ApexCharts(document.querySelector("#area"), this.areaOptions);
+    this.areaChart.render()
+    this.pieChart = new ApexCharts(document.querySelector("#chart"), this.pieOptions);
+    this.pieChart.render()
     this.getTransactions()
     this.connect()
   },
@@ -56,6 +109,35 @@ var transactionsOverview = new Vue({
                 vm.items.unshift(transactionObject)
                 vm.account = transactionObject.toAccount
                 vm.balance = transactionObject.balanceAfter
+
+                axios.get("/api/balance")
+                  .then(function (response) {
+                    vm.areaChart.updateSeries([{
+                      name: 'value',
+                      data: response.data
+                    }])
+                  })
+                  .catch(function (error) {
+                    console.log('Error! Could not reach the API. ' + error)
+                  })
+
+                  axios.get("/api/biggestspenders")
+                  .then(function (response) {
+                
+                    vm.pieOptions.series = response.data.series
+                    vm.pieOptions.labels = response.data.labels
+                
+                    console.log('pieooptons', vm.pieOptions)
+                
+                    vm.pieChart.destroy()
+                    vm.pieChart = new ApexCharts(document.querySelector("#chart"), vm.pieOptions);                
+                    vm.pieChart.render()
+                
+                  })
+                  .catch(function (error) {
+                    console.log('Error! Could not reach the API. ' + error)
+                  })
+                
               })
             },
             error => {
@@ -88,81 +170,3 @@ var transactionsOverview = new Vue({
 
   }
 })
-
-var areaOptions = {
-  series: [],
-  xaxis: {
-    type: "datetime",
-  },
-  yaxis: {
-    decimalsInFloat: 2
-  },
-  chart: {
-    height: 350,
-    type: "area",
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  stroke: {
-    curve: "smooth",
-  },
-  noData: {
-    text: 'Loading...'
-  }
-};
-
-var area = new ApexCharts(document.querySelector("#area"), areaOptions);
-area.render();
-axios.get("/api/balance")
-  .then(function (response) {
-    area.updateSeries([{
-      name: 'value',
-      data: response.data
-    }])
-  })
-  .catch(function (error) {
-    console.log('Error! Could not reach the API. ' + error)
-  })
-
-var pieOptions = {
-  series: [1,2,3,4,5],
-  chart: {
-    height: 350,
-    type: 'donut',
-    options: {
-      chart: {
-        id: "chart-id"
-      }
-    }
-  },
-  labels: ['a','b','c','d','e'],
-  responsive: [{
-    breakpoint: 480,
-    options: {
-      chart: {
-        width: 200,
-        id: "chart-id"
-      },
-      legend: {
-        position: 'bottom'
-      }
-    }
-  }]
-};
-
-axios.get("/api/biggestspenders")
-  .then(function (response) {
-
-    pieOptions.series = response.data.series
-    pieOptions.labels = response.data.labels
-
-    console.log('pieooptons', pieOptions)
-
-    var chart = new ApexCharts(document.querySelector("#chart"), pieOptions);
-    chart.render()
-    
-  })
-  .catch(function (error) {
-    console.log('Error! Could not reach the API. ' + error)
-  })

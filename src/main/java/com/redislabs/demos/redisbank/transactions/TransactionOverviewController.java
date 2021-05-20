@@ -77,7 +77,7 @@ public class TransactionOverviewController {
             BiggestSpenders biggestSpenders = new BiggestSpenders(range.size());
             int i = 0;
             for (TypedTuple<String> typedTuple : range) {
-                biggestSpenders.getSeries()[i] = typedTuple.getScore();
+                biggestSpenders.getSeries()[i] = Math.floor(typedTuple.getScore() * 100) / 100;
                 biggestSpenders.getLabels()[i] = typedTuple.getValue();
                 i++;
             }
