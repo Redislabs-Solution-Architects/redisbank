@@ -17,7 +17,7 @@ var transactionsOverview = new Vue({
         decimalsInFloat: 2
       },
       chart: {
-        height: 350,
+        height: 300,
         type: "area",
       },
       dataLabels: {
@@ -32,9 +32,9 @@ var transactionsOverview = new Vue({
     },
     areaChart: '',
     pieOptions : {
-      series: [1, 2, 3, 4, 5],
+      series: [],
       chart: {
-        height: 350,
+        height: 300,
         type: 'donut',
         options: {
           chart: {
@@ -42,7 +42,7 @@ var transactionsOverview = new Vue({
           }
         }
       },
-      labels: ['a', 'b', 'c', 'd', 'e'],
+      labels: [],
       responsive: [{
         breakpoint: 480,
         options: {
@@ -55,6 +55,10 @@ var transactionsOverview = new Vue({
           }
         }
       }]
+      ,
+      noData: {
+        text: 'Loading...'
+      }
     },
     piechart:''
   },
