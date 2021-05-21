@@ -17,7 +17,7 @@ var transactionsOverview = new Vue({
         decimalsInFloat: 2
       },
       chart: {
-        height: 300,
+        height: 200,
         type: "area",
       },
       dataLabels: {
@@ -34,7 +34,7 @@ var transactionsOverview = new Vue({
     pieOptions : {
       series: [],
       chart: {
-        height: 300,
+        height: 200,
         type: 'donut',
         options: {
           chart: {
@@ -67,7 +67,7 @@ var transactionsOverview = new Vue({
     this.areaChart.render()
     this.pieChart = new ApexCharts(document.querySelector("#chart"), this.pieOptions);
     this.pieChart.render()
-    this.getTransactions()
+    this.getInitialData()
     this.connect()
   },
   watch: {
@@ -81,7 +81,7 @@ var transactionsOverview = new Vue({
     this.debouncedGetAnswer = _.debounce(this.getAnswer, 100)
   },
   methods: {
-    getTransactions: function () {
+    getInitialData: function () {
       var transactionsUrl = '/api/transactions'
       var vm = this
       axios.get(transactionsUrl)
@@ -89,6 +89,34 @@ var transactionsOverview = new Vue({
           vm.items = response.data
           vm.account = response.data[0].toAccount
           vm.balance = response.data[0].balanceAfter
+        })
+        .catch(function (error) {
+          console.log('Error! Could not reach the API. ' + error)
+        })
+
+        axios.get("/api/balance")
+        .then(function (response) {
+          vm.areaChart.updateSeries([{
+            name: 'value',
+            data: response.data
+          }])
+        })
+        .catch(function (error) {
+          console.log('Error! Could not reach the API. ' + error)
+        })
+
+      axios.get("/api/biggestspenders")
+        .then(function (response) {
+
+          vm.pieOptions.series = response.data.series
+          vm.pieOptions.labels = response.data.labels
+
+          console.log('pieooptons', vm.pieOptions)
+
+          vm.pieChart.destroy()
+          vm.pieChart = new ApexCharts(document.querySelector("#chart"), vm.pieOptions);
+          vm.pieChart.render()
+
         })
         .catch(function (error) {
           console.log('Error! Could not reach the API. ' + error)

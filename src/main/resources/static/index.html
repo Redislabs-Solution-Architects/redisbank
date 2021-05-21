@@ -40,14 +40,7 @@
                         <li class="sidebar-item  ">
                             <a href="index.html" class='sidebar-link'>
                                 <i class="bi bi-grid-fill"></i>
-                                <span>Transaction overview</span>
-                            </a>
-                        </li>
-
-                        <li class="sidebar-item  ">
-                            <a href="index.html" class='sidebar-link'>
-                                <i class="bi bi-bar-chart-fill"></i>
-                                <span>Investment overview</span>
+                                <span>Account overview</span>
                             </a>
                         </li>
                     </ul>
@@ -93,15 +86,11 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-6 col-12">
-                                    Current balance: {{ balance }}
+                                <div class="col-md-6 col-12">Current balance:
+                                    <transition name="balance"><label
+                                        :key="balance">{{ balance }}</label></transition>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="card">
-                        <div class="card-header">
-                            <h4 class="card-title">How is my money doing?</h4>
                         </div>
                         <div class="card-content">
                             <div class="card-body">
@@ -118,7 +107,7 @@
                             </div>
                         </div>
                     </div>
-
+                    
                 </section>
                 <section>
                     <div class="card">
