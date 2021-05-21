@@ -9,8 +9,9 @@ as well as a personal finance management overview with realtime balance and bigg
 ## Prerequisites
 
 1. JDK 11 or higher (https://docs.microsoft.com/en-us/azure/developer/java/fundamentals/java-jdk-install)
-2. Azure CLI (https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
-3. Azure Spring Cloud extension for the Azure CLI (https://docs.microsoft.com/en-us/cli/azure/spring-cloud?view=azure-cli-latest)
+2. Docker Desktop (https://www.docker.com/products/docker-desktop)
+3. Azure CLI (https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+4. Azure Spring Cloud extension for the Azure CLI (https://docs.microsoft.com/en-us/cli/azure/spring-cloud?view=azure-cli-latest)
 
 ## Running locally
 
