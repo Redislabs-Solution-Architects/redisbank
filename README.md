@@ -1,14 +1,16 @@
 # About this repository
 
-Demo application #1 uses Redis core data structures, Streams, RediSearch and TimeSeries to build a
+This repository uses Redis core data structures, Streams, RediSearch and TimeSeries to build a
 Java/Spring Boot/Spring Data Redis Reactive application that shows a searchable transaction overview with realtime updates
-as well as in investments overview with realtime stock updates. UI in Bootstrap/CSS/Vue.
-
-Demo application #2 does not use Redis, instead it uses an RDBMS. It's a text based (Lanterna) based application
-that simulates an aging trading desk application. The application itself will communicate exclusively with the database.
-Via RedisCDC these changes will appear in demo application #1.
+as well as a personal finance management overview with realtime balance and biggest spenders updates. UI in Bootstrap/CSS/Vue.
 
 # Getting Started
+
+## Prerequisites
+
+1. JDK 11 or higher (https://docs.microsoft.com/en-us/azure/developer/java/fundamentals/java-jdk-install)
+2. Azure CLI (https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+3. Azure Spring Cloud extension for the Azure CLI (https://docs.microsoft.com/en-us/cli/azure/spring-cloud?view=azure-cli-latest)
 
 ## Running locally
 
