@@ -53,6 +53,7 @@ public class BankTransactionForwarder
 
     @Override
     public void onMessage(MapRecord<String, String, String> message) {
+        LOGGER.info("Message received from stream: {}", message);
         // Update search index whenever a new transaction arrives via the stream
         String messageString = message.getValue().get("transaction");
         try {
@@ -64,7 +65,7 @@ public class BankTransactionForwarder
 
         // Stream message to websocket connection topic
         smso.convertAndSend(config.getStomp().getTransactionsTopic(), message.getValue());
-        LOGGER.info("Streamed: {}", messageString);
+        LOGGER.info("Websocket message: {}", messageString);
 
     }
 

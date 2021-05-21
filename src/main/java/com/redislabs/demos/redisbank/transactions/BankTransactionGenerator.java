@@ -55,7 +55,7 @@ public class BankTransactionGenerator {
         this.redis = redis;
         this.connection = connection;
         this.tsc = rcf.getCommands(TimeSeriesCommands.class);
-        transactionSources = SerializationUtil.loadObjectList(TransactionSource.class, "transaction_sources.csv");
+        transactionSources = SerializationUtil.loadObjectList(TransactionSource.class, "/transaction_sources.csv");
         random = SecureRandom.getInstance("SHA1PRNG");
         random.setSeed("lars".getBytes("UTF-8")); // Prime the RNG so it always generates the same pseudorandom set
 
@@ -78,22 +78,25 @@ public class BankTransactionGenerator {
                 throw new RuntimeException(e);
             }
         }
-        LOGGER.info("Creating {} index", ACCOUNT_INDEX);
         commands.create(ACCOUNT_INDEX, Field.text("toAccountName").build());
+        LOGGER.info("Created {} index", ACCOUNT_INDEX);
 
-        LOGGER.info("Creating {} index", SEARCH_INDEX);
         commands.create(SEARCH_INDEX, Field.text("description").matcher(PhoneticMatcher.English).build(),
                 Field.text("fromAccountName").matcher(PhoneticMatcher.English).build(),
                 Field.text("transactionType").matcher(PhoneticMatcher.English).build());
+        LOGGER.info("Created {} index", SEARCH_INDEX);
     }
 
     private void deleteSortedSet() {
         redis.delete(SORTED_SET_KEY);
+        LOGGER.info("Deleted {} sorted set", SORTED_SET_KEY);
+
     }
 
     private void createTimeSeries() {
         redis.delete(BALANCE_TS);
         tsc.create(BALANCE_TS, 0);
+        LOGGER.info("Created {} time seris", BALANCE_TS);
     }
 
     private void createInitialStream() {
@@ -118,6 +121,7 @@ public class BankTransactionGenerator {
             transactionString = SerializationUtil.serializeObject(bankTransaction);
             update.put(TRANSACTION_KEY, transactionString);
             redis.opsForStream().add(TRANSACTIONS_STREAM, update);
+            LOGGER.info("Streamed {}", transactionString);
         } catch (JsonProcessingException e) {
             LOGGER.error("Error serialising object to JSON", e.getMessage());
         }

@@ -1,6 +1,7 @@
 package com.redislabs.demos.redisbank;
 
 import java.io.File;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.List;
@@ -25,9 +26,9 @@ public class SerializationUtil {
         try {
             CsvSchema bootstrapSchema = CsvSchema.emptySchema().withHeader();
             CsvMapper mapper = new CsvMapper();
-            File file = new ClassPathResource(fileName).getFile();
+            InputStream is = new ClassPathResource(fileName).getInputStream();
             MappingIterator<T> readValues = 
-              mapper.readerFor(type).with(bootstrapSchema).readValues(file);
+              mapper.readerFor(type).with(bootstrapSchema).readValues(is);
             return readValues.readAll();
         } catch (Exception e) {
             LOGGER.error("Error occurred while loading object list from file " + fileName, e);

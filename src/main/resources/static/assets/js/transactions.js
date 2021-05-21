@@ -100,7 +100,7 @@ var transactionsOverview = new Vue({
       axios.get(stompConfigUrl)
         .then(function (response) {
           var stompconfig = response.data
-          var url = 'ws://' + stompconfig.host + ':' + stompconfig.port + stompconfig.endpoint
+          var url = stompconfig.protocol + '://' + stompconfig.host + ':' + stompconfig.port + stompconfig.endpoint
           this.stompClient = Stomp.client(url)
 
           this.stompClient.connect(

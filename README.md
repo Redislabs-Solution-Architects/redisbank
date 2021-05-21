@@ -23,10 +23,30 @@ Via RedisCDC these changes will appear in demo application #1.
 2. Make sure you are logged into the Azure CLI
 3. Add the Azure Spring Cloud extension to the Azure CLI `az extension add --name spring-cloud` If you already have the extension, make sure it's up to date using `az extension update --name spring-cloud`
 2. Create an Azure Spring Cloud instance using `az spring-cloud create -n acrebank -g rdsLroACRE -l northeurope` (this may take a few minutes)
-3. Create an App in the newly created Azure Spring Cloud instance using `az spring-cloud app create -n acrebankapp -s acrebank -g rdsLroACRE --assign-endpoint true`
+3. Create an App in the newly created Azure Spring Cloud instance using `az spring-cloud app create -n acrebankapp -s acrebank -g rdsLroACRE --assign-endpoint true --runtime-version Java_11`
 4. Modify the application.properties so it points to your newly created ACRE instance
-5. Rebuild the app using `./mvnw package`
-6. Deploy the app to Azure Spring Cloud using `az spring-cloud app deploy -n acrebankapp -s acrebank -g rdsLroAcre --jar-path target/redisbank-0.0.1-SNAPSHOT.jar`
 
-Demo shows 
+```
+spring.redis.host=your ACRE hostname
+spring.redis.port=your ACRE port (default: 10000)
+spring.redis.password= your ACRE access key
+```
 
+5. Modify the application.properties so the websocket config will point to the Azure Spring Cloud app instance endpoint createed in step 3.
+
+```
+stomp.host=your ASC app endpoint URL (Default: <appname>-<service-name>.azuremicroservices.io)
+stomp.port=443
+stomp.protocol=wss
+```
+
+6. Rebuild the app using `./mvnw package`
+7. Deploy the app to Azure Spring Cloud using `az spring-cloud app deploy -n acrebankapp -s acrebank -g rdsLroAcre --jar-path target/redisbank-0.0.1-SNAPSHOT.jar`
+
+## Troubleshooting tips on Azure Spring Cloud
+
+To get the application logs:
+
+`az spring-cloud app logs -n acrebankapp -g rdsLroAcre -s acrebank`
+
+Note: project is compiled with JDK11 as that's currently the max LTS version that's supported by Azure Spring Cloud. Project will run fine when running locally or on other platforms up to JDK16.
