@@ -48,4 +48,28 @@ public class Utilities {
 
     }
 
+    public static final String generatePortfolioIdFrom(String userName)   {
+        if (StringUtils.isEmpty(userName)) {
+            throw new IllegalArgumentException("Parameter userName should have a value");
+        }
+
+        try {
+            // Set the seed of the pseudo random generator to the username,
+            // so we always get the same sequence for the same username
+            SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+            random.setSeed(userName.getBytes("UTF-8"));
+
+            StringBuilder builder = new StringBuilder();
+            builder.append("NL");
+            appendDigits(builder, random, 2);
+            builder.append("RBINV");
+            appendDigits(builder, random, 5);
+
+            return builder.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        
+    }
+
 }

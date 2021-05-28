@@ -1,7 +1,5 @@
 package com.redislabs.demos.redisbank.investments;
 
-import java.util.HashMap;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
@@ -13,12 +11,17 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @RedisHash
-public class StockPortfolio {
+public class Trade {
     
     @Id
     private Long id;
-    private HashMap<Stock, Double> stocks = new HashMap<>();
-    private String portfolioId;
-    private String portfolioHolderName;
-    
+    private Stock stock;
+    private int amount;
+    private String fromPortfolio;
+    private String fromPortfolioName;
+    private String toPortfolio;
+    private String toPortfolioName;
+    private String createdDate;
+    private String settledDate;
+    private String settledBy;
 }
