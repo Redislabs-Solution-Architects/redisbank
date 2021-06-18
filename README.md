@@ -4,6 +4,14 @@ This repository uses Redis core data structures, Streams, RediSearch and TimeSer
 Java/Spring Boot/Spring Data Redis Reactive application that shows a searchable transaction overview with realtime updates
 as well as a personal finance management overview with realtime balance and biggest spenders updates. UI in Bootstrap/CSS/Vue.
 
+Features in this demo:
+
+Redis Streams for the realtime transactions
+Redis TimeSeries for the balance over time
+RediSearch for searching transactions
+Sorted Sets for the 'biggest spenders'
+Redis hashes for session storage (via Spring Session)
+
 # Getting Started
 
 ## Prerequisites
