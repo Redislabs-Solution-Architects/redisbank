@@ -6,8 +6,6 @@ import java.util.Set;
 
 import com.redislabs.demos.redisbank.Config;
 import com.redislabs.demos.redisbank.Config.StompConfig;
-import com.redislabs.demos.redisbank.UserSession;
-import com.redislabs.demos.redisbank.UserSessionRepository;
 import com.redislabs.demos.redisbank.Utilities;
 import com.redislabs.demos.redisbank.timeseries.TimeSeriesCommands;
 import com.redislabs.lettusearch.RediSearchCommands;
@@ -42,15 +40,13 @@ public class TransactionOverviewController {
     private static final String SORTED_SET_KEY = "bigspenders";
 
     private final Config config;
-    private final UserSessionRepository userSessionRepository;
     private final StatefulRediSearchConnection<String, String> srsc;
     private final StringRedisTemplate redis;
     private final TimeSeriesCommands tsc;
 
-    public TransactionOverviewController(Config config, UserSessionRepository userSessionRepository,
-            StatefulRediSearchConnection<String, String> srsc, RedisCommandFactory rcf, StringRedisTemplate redis) {
+    public TransactionOverviewController(Config config, StatefulRediSearchConnection<String, String> srsc,
+            RedisCommandFactory rcf, StringRedisTemplate redis) {
         this.config = config;
-        this.userSessionRepository = userSessionRepository;
         this.srsc = srsc;
         this.tsc = rcf.getCommands(TimeSeriesCommands.class);
         this.redis = redis;
@@ -118,14 +114,6 @@ public class TransactionOverviewController {
         RediSearchCommands<String, String> commands = srsc.sync();
         SearchResults<String, String> results = commands.search(ACCOUNT_INDEX, "lars");
         return results;
-    }
-
-    @GetMapping(value = "/login")
-    public void login(@RequestParam String userName) {
-        String accountNumber = Utilities.generateFakeIbanFrom(userName);
-        UserSession userSession = new UserSession(userName, accountNumber);
-        userSessionRepository.save(userSession);
-
     }
 
 }
