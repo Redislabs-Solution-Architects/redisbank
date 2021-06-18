@@ -6,11 +6,11 @@ as well as a personal finance management overview with realtime balance and bigg
 
 Features in this demo:
 
-Redis Streams for the realtime transactions
-Redis TimeSeries for the balance over time
-RediSearch for searching transactions
-Sorted Sets for the 'biggest spenders'
-Redis hashes for session storage (via Spring Session)
+- Redis Streams for the realtime transactions
+- Redis TimeSeries for the balance over time
+- RediSearch for searching transactions
+- Sorted Sets for the 'biggest spenders'
+- Redis hashes for session storage (via Spring Session)
 
 # Getting Started
 
