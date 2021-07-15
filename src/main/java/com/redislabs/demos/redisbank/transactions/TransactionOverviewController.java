@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.redislabs.demos.redisbank.Config;
 import com.redislabs.demos.redisbank.Config.StompConfig;
-import com.redislabs.demos.redisbank.Utilities;
 import com.redislabs.demos.redisbank.timeseries.TimeSeriesCommands;
 import com.redislabs.lettusearch.RediSearchCommands;
 import com.redislabs.lettusearch.SearchOptions;
@@ -24,8 +23,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import io.lettuce.core.dynamic.RedisCommandFactory;
 
 @RestController
 @RequestMapping(path = "/api")
@@ -45,10 +42,10 @@ public class TransactionOverviewController {
     private final TimeSeriesCommands tsc;
 
     public TransactionOverviewController(Config config, StatefulRediSearchConnection<String, String> srsc,
-            RedisCommandFactory rcf, StringRedisTemplate redis) {
+            TimeSeriesCommands tsc, StringRedisTemplate redis) {
         this.config = config;
         this.srsc = srsc;
-        this.tsc = rcf.getCommands(TimeSeriesCommands.class);
+        this.tsc = tsc;
         this.redis = redis;
     }
 
@@ -61,7 +58,6 @@ public class TransactionOverviewController {
     public Balance[] balance() {
         Map<String, String> tsValues = tsc.range(BALANCE_TS, System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 7),
                 System.currentTimeMillis());
-
         Balance[] balanceTs = new Balance[tsValues.size()];
         int i = 0;
 
@@ -77,9 +73,7 @@ public class TransactionOverviewController {
 
     @GetMapping("/biggestspenders")
     public BiggestSpenders biggestSpenders() {
-
         Set<TypedTuple<String>> range = redis.opsForZSet().rangeByScoreWithScores(SORTED_SET_KEY, 0, Double.MAX_VALUE);
-
         if (range.size() > 0) {
             BiggestSpenders biggestSpenders = new BiggestSpenders(range.size());
             int i = 0;

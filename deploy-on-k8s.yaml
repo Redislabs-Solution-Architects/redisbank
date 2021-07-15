@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redisbank-deployment
+spec:
+  selector:
+    matchLabels:
+      app: redisbank
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redisbank
+    spec:
+      containers:
+      - name: redisbank
+        image: <yourimageurl>
+        imagePullPolicy: Always
+        ports:
+        - name: redisbank
+          containerPort: 8080
+        env:
+        - name: SPRING_REDIS_HOST
+          valueFrom:
+            secretKeyRef:
+              name: redb-redis-enterprise-database
+              key: service_name
+        - name: SPRING_REDIS_PORT
+          valueFrom:
+            secretKeyRef:
+              name: redb-redis-enterprise-database
+              key: port
+        - name: SPRING_REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: redb-redis-enterprise-database
+              key: password

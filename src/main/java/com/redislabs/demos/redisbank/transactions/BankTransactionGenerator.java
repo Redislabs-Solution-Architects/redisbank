@@ -27,7 +27,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import io.lettuce.core.RedisCommandExecutionException;
-import io.lettuce.core.dynamic.RedisCommandFactory;
 
 @Component
 public class BankTransactionGenerator {
@@ -51,10 +50,10 @@ public class BankTransactionGenerator {
     private final TimeSeriesCommands tsc;
 
     public BankTransactionGenerator(StringRedisTemplate redis, StatefulRediSearchConnection<String, String> connection,
-            RedisCommandFactory rcf) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+            TimeSeriesCommands tsc) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         this.redis = redis;
         this.connection = connection;
-        this.tsc = rcf.getCommands(TimeSeriesCommands.class);
+        this.tsc = tsc;
         transactionSources = SerializationUtil.loadObjectList(TransactionSource.class, "/transaction_sources.csv");
         random = SecureRandom.getInstance("SHA1PRNG");
         random.setSeed("lars".getBytes("UTF-8")); // Prime the RNG so it always generates the same pseudorandom set

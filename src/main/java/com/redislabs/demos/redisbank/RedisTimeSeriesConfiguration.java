@@ -1,5 +1,7 @@
 package com.redislabs.demos.redisbank;
 
+import com.redislabs.demos.redisbank.timeseries.TimeSeriesCommands;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,4 +16,9 @@ public class RedisTimeSeriesConfiguration {
         return new RedisCommandFactory(redis.connect());
     }
     
+    @Bean
+    TimeSeriesCommands timeSeriesCommands(RedisCommandFactory rcf)  {
+        return rcf.getCommands(TimeSeriesCommands.class);
+    }
+
 }
