@@ -13,7 +13,7 @@ Features in this demo:
 - Redis hashes for session storage (via Spring Session)
 
 # Architecture
-<img src="architecture.png" height=600/>
+<img src="architecture.png"/>
 
 # Getting Started
 
