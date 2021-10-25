@@ -1,0 +1,23 @@
+{
+    "app_name": "RedisBank",  //Name of the app
+    "description": "Example of a realtime online retail banking application", // One line description
+    "hidden": "true", // Can be "true" or "false". If true, this app won't show up in Launchpad.
+    "rank": "21", // This is used to sort the apps in the launchpad. 1 to 20 are reserved. Enter greater than 20
+    "type": "Full App", //Can be "Building Block" or "Full App"
+    "contributed_by": "Redis", // Can be "Redis Labs" or "Community" or "Partner"
+    "repo_url": "https://github.com/Redislabs-Solution-Architects/redisbank", //This is the Gitub Repo's URL.
+    "download_url": "https://github.com/Redislabs-Solution-Architects/redisbank/archive/refs/heads/main.zip",//This is a direct link to the Github's download button so people can download it directly from the Marketplace
+    "hosted_url": "", //The URL of the app. if you are hosting this app somewhere
+    "quick_deploy": "", //"true" if the project has Heroku, Vercel, Google deploy buttons
+    "deploy_buttons": [],//Deploy buttons for "heroku", "vercel" or "Google" in the form of objects.
+    "language": ["Java", "JavaScript"], // Backend technologies: "JavaScript", "Java", "Python", "Go", "C#", "Ruby", "PHP", etc. 
+    "redis_commands": [], // Enter all the Redis commands
+    "redis_features": ["caching","sorted sets"],// Enter any core Redis feature or leave it blank.
+    "redis_modules": ["RediSearch", "RedisTimeSeries"], //Value can be one or more of "RediJSON", "", "RedisTimeseries", "RedisAI"  "RedisGears" or "RedisGraph" listed in an array. 
+    "app_image_urls": [
+    ], // Provide any image urls in an array.
+    "youtube_url": "", //Provide a Youtube link to your app's video
+    "special_tags": [], // "Hackathon", "Paid", or any event names.
+    "verticals": ["Financial"], // Can be: "Healthcare", "Financial", "Tourism", "Retail", "Oil & Gas", "Manufacturing", "Technology","Education", "Construction"  
+    "markdown": "https://github.com/Redislabs-Solution-Architects/redisbank/blob/main/README.md" // Link to the RAW Markdown.
+}

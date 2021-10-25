@@ -61,3 +61,8 @@ To get the application logs:
 `az spring-cloud app logs -n acrebankapp -g rdsLroAcre -s acrebank`
 
 Note: project is compiled with JDK11 as that's currently the max LTS version that's supported by Azure Spring Cloud. Project will run fine when running locally or on other platforms up to JDK16.
+
+## Known issues
+
+1. Thread safety. Data is currently generated off of a single stream of transactions, which means it's the same for all users. Not a problem with the current iteration because it's single user, but beware when expanding this to multi-user.
+2. Hardcoded values. Code uses hardcoded values throughout the code, these need to be replaced with proper variables.
