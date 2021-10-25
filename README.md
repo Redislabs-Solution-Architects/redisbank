@@ -12,6 +12,9 @@ Features in this demo:
 - Sorted Sets for the 'biggest spenders'
 - Redis hashes for session storage (via Spring Session)
 
+# Architecture
+<img src="architecture.png" height=600/>
+
 # Getting Started
 
 ## Prerequisites
