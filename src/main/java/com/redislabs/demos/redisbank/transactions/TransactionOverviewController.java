@@ -14,8 +14,6 @@ import com.redislabs.lettusearch.SearchOptions.Highlight.Tag;
 import com.redislabs.lettusearch.SearchResults;
 import com.redislabs.lettusearch.StatefulRediSearchConnection;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,8 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping(path = "/api")
 @CrossOrigin
 public class TransactionOverviewController {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionOverviewController.class);
 
     private static final String ACCOUNT_INDEX = "transaction_account_idx";
     private static final String SEARCH_INDEX = "transaction_description_idx";

@@ -19,7 +19,7 @@ Features in this demo:
 
 ## Prerequisites
 
-1. JDK 11 or higher (https://openjdk.java.net/install/index.html)
+1. JDK 17 or higher (https://openjdk.java.net/install/index.html)
 2. Docker Desktop (https://www.docker.com/products/docker-desktop)
 3. Azure CLI (https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 4. Azure Spring Cloud extension for the Azure CLI (https://docs.microsoft.com/en-us/cli/azure/spring-cloud?view=azure-cli-latest)
@@ -27,9 +27,10 @@ Features in this demo:
 ## Running locally
 
 1. Checkout the project
-2. `docker run -p 6379:6379 redislabs/redismod:latest`
-3. `./mvnw clean package spring-boot:run`
-4. Navigate to http://localhost:8080 and login with user lars and password larsje
+2. `./mvnw clean package`
+3. `docker run -p 6379:6379 redislabs/redismod:latest`
+4. `./mvnw spring-boot:run`
+5. Navigate to http://localhost:8080 and login with user lars and password larsje
 
 ## Running on Azure Spring Cloud
 

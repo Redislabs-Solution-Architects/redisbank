@@ -1,6 +1,5 @@
 package com.redislabs.demos.redisbank;
 
-import java.io.File;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
