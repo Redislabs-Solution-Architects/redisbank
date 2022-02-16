@@ -27,10 +27,9 @@ Features in this demo:
 ## Running locally
 
 1. Checkout the project
-2. `./mvnw clean package`
-3. `docker run -p 6379:6379 redislabs/redismod:latest`
-4. `./mvnw spring-boot:run`
-5. Navigate to http://localhost:8080 and login with user lars and password larsje
+2. `docker-compose.sh up`
+3. Navigate to http://localhost:8080 and login with user lars and password larsje
+4. Stop and clean with `docker-compose down -v --rmi local --remove-orphans`
 
 ## Running on Azure Spring Cloud
 
