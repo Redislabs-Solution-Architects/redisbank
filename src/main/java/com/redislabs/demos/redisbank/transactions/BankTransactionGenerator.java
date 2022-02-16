@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,7 +44,7 @@ public class BankTransactionGenerator {
     private final List<TransactionSource> transactionSources;
     private final SecureRandom random;
     private final DateFormat df = new SimpleDateFormat("yyyy.MM.dd 'at' HH:mm:ss");
-    private final NumberFormat nf = NumberFormat.getCurrencyInstance();
+    private final NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
     private final StringRedisTemplate redis;
     private final StatefulRediSearchConnection<String, String> connection;
