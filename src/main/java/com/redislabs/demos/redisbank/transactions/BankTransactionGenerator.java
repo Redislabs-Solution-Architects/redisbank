@@ -13,13 +13,12 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.redis.lettucemod.api.StatefulRedisModulesConnection;
+import com.redis.lettucemod.api.sync.RediSearchCommands;
+import com.redis.lettucemod.search.Field;
+import com.redis.lettucemod.timeseries.CreateOptions;
 import com.redislabs.demos.redisbank.SerializationUtil;
 import com.redislabs.demos.redisbank.Utilities;
-import com.redislabs.demos.redisbank.timeseries.TimeSeriesCommands;
-import com.redislabs.lettusearch.Field;
-import com.redislabs.lettusearch.Field.Text.PhoneticMatcher;
-import com.redislabs.lettusearch.RediSearchCommands;
-import com.redislabs.lettusearch.StatefulRediSearchConnection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,14 +46,11 @@ public class BankTransactionGenerator {
     private final NumberFormat nf = NumberFormat.getCurrencyInstance(Locale.GERMANY);
 
     private final StringRedisTemplate redis;
-    private final StatefulRediSearchConnection<String, String> connection;
-    private final TimeSeriesCommands tsc;
+    private final StatefulRedisModulesConnection<String, String> connection;
 
-    public BankTransactionGenerator(StringRedisTemplate redis, StatefulRediSearchConnection<String, String> connection,
-            TimeSeriesCommands tsc) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public BankTransactionGenerator(StringRedisTemplate redis, StatefulRedisModulesConnection<String, String> connection) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         this.redis = redis;
         this.connection = connection;
-        this.tsc = tsc;
         transactionSources = SerializationUtil.loadObjectList(TransactionSource.class, "/transaction_sources.csv");
         random = SecureRandom.getInstance("SHA1PRNG");
         random.setSeed("lars".getBytes("UTF-8")); // Prime the RNG so it always generates the same pseudorandom set
@@ -70,8 +66,8 @@ public class BankTransactionGenerator {
     private void createSearchIndices() {
         RediSearchCommands<String, String> commands = connection.sync();
         try {
-            commands.dropIndex(ACCOUNT_INDEX);
-            commands.dropIndex(SEARCH_INDEX);
+            commands.dropindex(ACCOUNT_INDEX);
+            commands.dropindex(SEARCH_INDEX);
         } catch (RedisCommandExecutionException e) {
             if (!e.getMessage().equals("Unknown Index name")) {
                 LOGGER.error("Error dropping index: {}", e.getMessage());
@@ -81,9 +77,9 @@ public class BankTransactionGenerator {
         commands.create(ACCOUNT_INDEX, Field.text("toAccountName").build());
         LOGGER.info("Created {} index", ACCOUNT_INDEX);
 
-        commands.create(SEARCH_INDEX, Field.text("description").matcher(PhoneticMatcher.English).build(),
-                Field.text("fromAccountName").matcher(PhoneticMatcher.English).build(),
-                Field.text("transactionType").matcher(PhoneticMatcher.English).build());
+        commands.create(SEARCH_INDEX, Field.text("description").matcher(Field.TextField.PhoneticMatcher.ENGLISH).build(),
+                Field.text("fromAccountName").matcher(Field.TextField.PhoneticMatcher.ENGLISH).build(),
+                Field.text("transactionType").matcher(Field.TextField.PhoneticMatcher.ENGLISH).build());
         LOGGER.info("Created {} index", SEARCH_INDEX);
     }
 
@@ -95,7 +91,8 @@ public class BankTransactionGenerator {
 
     private void createTimeSeries() {
         redis.delete(BALANCE_TS);
-        tsc.create(BALANCE_TS, 0);
+        CreateOptions co = CreateOptions.builder().retentionPeriod(0).build();
+        connection.sync().create(BALANCE_TS, co);
         LOGGER.info("Created {} time seris", BALANCE_TS);
     }
 
@@ -153,7 +150,7 @@ public class BankTransactionGenerator {
         }
 
         balance = balance + roundedAmount;
-        tsc.add(BALANCE_TS, balance);
+        connection.sync().addAutoTimestamp(BALANCE_TS, balance);
         redis.opsForZSet().incrementScore(SORTED_SET_KEY, accountName, roundedAmount * -1);
 
         return nf.format(roundedAmount);

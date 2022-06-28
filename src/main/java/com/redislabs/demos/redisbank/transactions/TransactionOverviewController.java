@@ -1,18 +1,18 @@
 package com.redislabs.demos.redisbank.transactions;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.redis.lettucemod.api.StatefulRedisModulesConnection;
+import com.redis.lettucemod.api.sync.RediSearchCommands;
+import com.redis.lettucemod.search.SearchOptions;
+import com.redis.lettucemod.search.SearchResults;
+import com.redis.lettucemod.timeseries.Sample;
+import com.redis.lettucemod.timeseries.TimeRange;
 import com.redislabs.demos.redisbank.Config;
 import com.redislabs.demos.redisbank.Config.StompConfig;
-import com.redislabs.demos.redisbank.timeseries.TimeSeriesCommands;
-import com.redislabs.lettusearch.RediSearchCommands;
-import com.redislabs.lettusearch.SearchOptions;
-import com.redislabs.lettusearch.SearchOptions.Highlight;
-import com.redislabs.lettusearch.SearchOptions.Highlight.Tag;
-import com.redislabs.lettusearch.SearchResults;
-import com.redislabs.lettusearch.StatefulRediSearchConnection;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
@@ -33,15 +33,13 @@ public class TransactionOverviewController {
     private static final String SORTED_SET_KEY = "bigspenders";
 
     private final Config config;
-    private final StatefulRediSearchConnection<String, String> srsc;
+    private final StatefulRedisModulesConnection<String, String> srsc;
     private final StringRedisTemplate redis;
-    private final TimeSeriesCommands tsc;
 
-    public TransactionOverviewController(Config config, StatefulRediSearchConnection<String, String> srsc,
-            TimeSeriesCommands tsc, StringRedisTemplate redis) {
+    public TransactionOverviewController(Config config, StatefulRedisModulesConnection<String, String> srsc,
+            StringRedisTemplate redis) {
         this.config = config;
         this.srsc = srsc;
-        this.tsc = tsc;
         this.redis = redis;
     }
 
@@ -52,13 +50,14 @@ public class TransactionOverviewController {
 
     @GetMapping("/balance")
     public Balance[] balance() {
-        Map<String, String> tsValues = tsc.range(BALANCE_TS, System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 7),
-                System.currentTimeMillis());
+        List<Sample> tsValues = srsc.sync().range(BALANCE_TS,
+                TimeRange.from(System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 7))
+                        .to(System.currentTimeMillis()).build());
         Balance[] balanceTs = new Balance[tsValues.size()];
         int i = 0;
 
-        for (Entry<String, String> entry : tsValues.entrySet()) {
-            Object keyString = entry.getKey();
+        for (Sample entry : tsValues) {
+            Object keyString = entry.getTimestamp();
             Object valueString = entry.getValue();
             balanceTs[i] = new Balance(keyString, valueString);
             i++;
@@ -91,9 +90,8 @@ public class TransactionOverviewController {
         RediSearchCommands<String, String> commands = srsc.sync();
 
         SearchOptions options = SearchOptions
-                .builder().highlight(Highlight.builder().field("description").field("fromAccountName")
-                        .field("transactionType").tag(Tag.builder().open("<mark>").close("</mark>").build()).build())
-                .build();
+                .builder().highlight(SearchOptions.Highlight.builder().field("description").field("fromAccountName")
+                        .field("transactionType").tags("<mark>","</mark>").build()).build();
 
         SearchResults<String, String> results = commands.search(SEARCH_INDEX, term, options);
         return results;
