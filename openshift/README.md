@@ -93,7 +93,7 @@ In `pom.xml` add [jkube](https://github.com/eclipse/jkube/tree/master/openshift-
 <plugin>
 	<groupId>org.eclipse.jkube</groupId>
 	<artifactId>openshift-maven-plugin</artifactId>
-	<version>1.7.0</version>
+	<version>1.8.0</version>
 </plugin>
 ```
 
