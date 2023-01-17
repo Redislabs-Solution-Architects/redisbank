@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: redis-configmap
+data:
+  SPRING_REDIS_HOST: "<yourredishost>"
+  SPRING_REDIS_PORT: "<yourredisport"
+  SPRING_REDIS_PASSWORD: "yourredispassword"
+  STOMP_HOST: "yourloadbalncerip"
+  STOMP_PORT: "8080"
+  STOMP_PROTOCOL: "ws"

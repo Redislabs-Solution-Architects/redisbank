@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redisbank-deployment
+spec:
+  selector:
+    matchLabels:
+      app: redisbank
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redisbank
+    spec:
+      containers:
+      - name: redisbank
+        image: <yourdockerhubid>/redisbank:2.0
+        resources:
+          requests:
+            memory: "1024Mi"
+            cpu: "250m"
+          limits:
+            memory: "1024Mi"
+            cpu: "500m"
+        ports:
+        - name: redisbank
+          containerPort: 8080
+        env:
+        - name: SPRING_REDIS_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: redis-configmap
+              key: SPRING_REDIS_HOST
+        - name: SPRING_REDIS_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: redis-configmap
+              key: SPRING_REDIS_PORT
+        - name: SPRING_REDIS_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: redis-configmap
+              key: SPRING_REDIS_PASSWORD
+        - name: STOMP_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: redis-configmap
+              key: STOMP_HOST
+        - name: STOMP_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: redis-configmap
+              key: STOMP_PORT
+        - name: STOMP_PROTOCOL
+          valueFrom:
+            configMapKeyRef:
+              name: redis-configmap
+              key: STOMP_PROTOCOL

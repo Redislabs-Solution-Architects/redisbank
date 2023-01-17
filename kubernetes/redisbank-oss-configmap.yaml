@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: redis-configmap
-data:
-  SPRING_REDIS_HOST: my-redis
-  SPRING_REDIS_PORT: "6379"
