@@ -34,3 +34,7 @@ build/
 
 ## Mac ###
 .DS_Store
+
+# files with sensitive info in them
+redisbank-configmap.yaml
+redisbank-deployment.yaml
