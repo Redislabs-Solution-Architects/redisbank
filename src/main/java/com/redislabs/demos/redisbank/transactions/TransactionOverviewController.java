@@ -1,10 +1,5 @@
 package com.redislabs.demos.redisbank.transactions;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import com.redis.lettucemod.api.StatefulRedisModulesConnection;
 import com.redis.lettucemod.api.sync.RediSearchCommands;
 import com.redis.lettucemod.search.SearchOptions;
@@ -13,14 +8,12 @@ import com.redis.lettucemod.timeseries.Sample;
 import com.redis.lettucemod.timeseries.TimeRange;
 import com.redislabs.demos.redisbank.Config;
 import com.redislabs.demos.redisbank.Config.StompConfig;
-
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping(path = "/api")
@@ -50,7 +43,7 @@ public class TransactionOverviewController {
 
     @GetMapping("/balance")
     public Balance[] balance() {
-        List<Sample> tsValues = srsc.sync().range(BALANCE_TS,
+        List<Sample> tsValues = srsc.sync().tsRange(BALANCE_TS,
                 TimeRange.from(System.currentTimeMillis() - (1000 * 60 * 60 * 24 * 7))
                         .to(System.currentTimeMillis()).build());
         Balance[] balanceTs = new Balance[tsValues.size()];
@@ -93,14 +86,14 @@ public class TransactionOverviewController {
                 .builder().highlight(SearchOptions.Highlight.builder().field("description").field("fromAccountName")
                         .field("transactionType").tags("<mark>","</mark>").build()).build();
 
-        SearchResults<String, String> results = commands.search(SEARCH_INDEX, term, options);
+        SearchResults<String, String> results = commands.ftSearch(SEARCH_INDEX, term, options);
         return results;
     }
 
     @GetMapping("/transactions")
     public SearchResults<String, String> listTransactions() {
         RediSearchCommands<String, String> commands = srsc.sync();
-        SearchResults<String, String> results = commands.search(ACCOUNT_INDEX, "lars");
+        SearchResults<String, String> results = commands.ftSearch(ACCOUNT_INDEX, "lars");
         return results;
     }
 
