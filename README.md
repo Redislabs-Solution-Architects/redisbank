@@ -27,11 +27,20 @@ Features in this demo:
 
 ## Running locally
 
-1. Checkout the project
-1. `docker-compose.sh up`
-1. Navigate to <http://localhost:8080>
-1. Login with user `lars` and password `larsje`
-1. Stop and clean with `docker-compose down -v --rmi local --remove-orphans`
+1. Git clone this repository
+2. `docker compose build` will produce a local maven build and local docker image with the application
+3. `docker compose up` will start Redis and the application
+4. Navigate to <http://localhost:8080>
+5. Login with user `lars` (the password `larsje` is already configured for you)
+6. Download/use [Redis Insight](https://redis.io/insight/) to explore the content of the Redis database (the Redis on docker is exposed on localhost:6379) 
+7. Stop and clean with `docker compose down -v --rmi local --remove-orphans`
+
+## Application overview
+
+![Login](redisbank1.png)
+
+![Real time with Redis](redisbank2.png)
+
 
 ## Running on Azure Spring Cloud
 
@@ -83,5 +92,3 @@ Please see [Deploy on Kubernetes with Redis Enterprise](./kubernetes/redis-enter
 
 1. Thread safety. Data is currently generated off of a single stream of transactions, which means it's the same for all users. Not a problem with the current iteration because it's single user, but beware when expanding this to multi-user.
 1. Hardcoded values. Code uses hardcoded values throughout the code, these need to be replaced with proper variables.
-1. Update to Redis Stack
-1. Add Redis Insight
