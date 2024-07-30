@@ -3,6 +3,8 @@ package com.redislabs.demos.redisbank.transactions;
 import java.time.Duration;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.redis.lettucemod.api.StatefulRedisModulesConnection;
+import com.redis.lettucemod.api.sync.RedisModulesCommands;
 import com.redislabs.demos.redisbank.Config;
 import com.redislabs.demos.redisbank.SerializationUtil;
 
@@ -30,16 +32,21 @@ public class BankTransactionForwarder
     private final Config config;
     private final StringRedisTemplate redis;
     private final SimpMessageSendingOperations smso;
+
+    //private final RedisModulesCommands<String, String> redisjson;
+    private final StatefulRedisModulesConnection<String, String> redisjson;
+
     private final BankTransactionRepository btr;
     private StreamMessageListenerContainer<String, MapRecord<String, String, String>> container;
     private Subscription subscription;
 
     public BankTransactionForwarder(Config config, StringRedisTemplate redis, SimpMessageSendingOperations smso,
-            BankTransactionRepository btr) {
+            BankTransactionRepository btr, StatefulRedisModulesConnection redisjson) {
         this.config = config;
         this.redis = redis;
         this.smso = smso;
         this.btr = btr;
+        this.redisjson = redisjson;
     }
 
     @Override
@@ -59,6 +66,9 @@ public class BankTransactionForwarder
         try {
             BankTransaction bankTransaction = SerializationUtil.deserializeObject(messageString, BankTransaction.class);
             btr.save(bankTransaction);
+            //TODO save as JSON
+            redisjson.sync().jsonSet("jsontx:"+bankTransaction.getId(), ".", messageString);
+
         } catch (JsonProcessingException e) {
             LOGGER.error("Error parsing JSON: {}", e.getMessage());
         }

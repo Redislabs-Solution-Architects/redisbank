@@ -14,7 +14,8 @@ var transactionsOverview = new Vue({
         type: "datetime",
       },
       yaxis: {
-        decimalsInFloat: 2
+        min: 80000,
+        decimalsInFloat: 0
       },
       chart: {
         height: 200,

@@ -147,13 +147,13 @@ public class BankTransactionGenerator {
         Double amount = random.nextDouble() * bandwidth % 300.0;
         Double roundedAmount = Math.floor(amount * 100) / 100;
 
-        if (random.nextBoolean()) {
-            roundedAmount = roundedAmount * -1.00;
-        }
+        //if (random.nextBoolean()) {
+        //    roundedAmount = roundedAmount * -1.00;
+        //}
 
-        balance = balance + roundedAmount;
+        balance = balance - roundedAmount;//neg here
         connection.sync().tsAdd(BALANCE_TS, Sample.value(balance).build());
-        redis.opsForZSet().incrementScore(SORTED_SET_KEY, accountName, roundedAmount * -1);
+        redis.opsForZSet().incrementScore(SORTED_SET_KEY, accountName, roundedAmount );//* -1);
 
         return nf.format(roundedAmount);
     }
