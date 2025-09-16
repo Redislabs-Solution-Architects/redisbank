@@ -1,5 +1,6 @@
 package com.redislabs.demos.redisbank;
 
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
 import io.micrometer.core.instrument.util.StringUtils;
@@ -26,7 +27,7 @@ public class Utilities {
             // Set the seed of the pseudo random generator to the username,
             // so we always get the same sequence for the same username
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-            random.setSeed(userName.getBytes("UTF-8"));
+            random.setSeed(userName.getBytes(StandardCharsets.UTF_8));
 
             StringBuilder builder = new StringBuilder();
             builder.append("NL");
@@ -57,7 +58,7 @@ public class Utilities {
             // Set the seed of the pseudo random generator to the username,
             // so we always get the same sequence for the same username
             SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
-            random.setSeed(userName.getBytes("UTF-8"));
+            random.setSeed(userName.getBytes(StandardCharsets.UTF_8));
 
             StringBuilder builder = new StringBuilder();
             builder.append("NL");

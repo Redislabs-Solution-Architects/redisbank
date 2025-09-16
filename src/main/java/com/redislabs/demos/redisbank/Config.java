@@ -1,5 +1,6 @@
 package com.redislabs.demos.redisbank;
 
+import java.io.Serial;
 import java.io.Serializable;
 
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -16,6 +17,7 @@ public @Data class Config {
 	private StompConfig stomp = new StompConfig();
 
 	public static @Data class StompConfig implements Serializable {
+		@Serial
 		private static final long serialVersionUID = -623741573410463326L;
 		private String protocol;
 		private String host;

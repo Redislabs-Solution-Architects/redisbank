@@ -1,6 +1,7 @@
 package com.redislabs.demos.redisbank.transactions;
 
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DateFormat;
@@ -55,7 +56,7 @@ public class BankTransactionGenerator {
         this.connection = connection;
         transactionSources = SerializationUtil.loadObjectList(TransactionSource.class, "/transaction_sources.csv");
         random = SecureRandom.getInstance("SHA1PRNG");
-        random.setSeed("lars".getBytes("UTF-8")); // Prime the RNG so it always generates the same pseudorandom set
+        random.setSeed("lars".getBytes(StandardCharsets.UTF_8)); // Prime the RNG so it always generates the same pseudorandom set
 
         createSearchIndices();
         deleteSortedSet();
@@ -67,15 +68,18 @@ public class BankTransactionGenerator {
     @SuppressWarnings("unchecked")
     private void createSearchIndices() {
         RediSearchCommands<String, String> commands = connection.sync();
-        try {
+        // previous code was droping the index, if "unknown index name" was thrown (error in redis-stack:7.4) it was ignored
+        // but redis:8.0.1 now throws "no such index", so the error was not ignored and container failed to start.
+        // so the implementation below is more robust (Independent of the error message)
+        var indexes = commands.ftList();
+
+        if (indexes.contains(ACCOUNT_INDEX)) {
             commands.ftDropindex(ACCOUNT_INDEX);
-            commands.ftDropindex(SEARCH_INDEX);
-        } catch (RedisCommandExecutionException e) {
-            if (!e.getMessage().equals("Unknown Index name")) {
-                LOGGER.error("Error dropping index: {}", e.getMessage());
-                throw new RuntimeException(e);
-            }
         }
+        if (indexes.contains(SEARCH_INDEX)) {
+            commands.ftDropindex(SEARCH_INDEX);
+        }
+
         commands.ftCreate(ACCOUNT_INDEX, Field.text("toAccountName").build());
         LOGGER.info("Created {} index", ACCOUNT_INDEX);
 
@@ -143,8 +147,8 @@ public class BankTransactionGenerator {
     }
 
     private String createTransactionAmount(String accountName) {
-        Double bandwidth = (1 + random.nextInt(3)) * 100.00;
-        Double amount = random.nextDouble() * bandwidth % 300.0;
+        double bandwidth = (1 + random.nextInt(3)) * 100.00;
+        double amount = random.nextDouble() * bandwidth % 300.0;
         Double roundedAmount = Math.floor(amount * 100) / 100;
 
         //if (random.nextBoolean()) {

@@ -5,7 +5,7 @@ Java/Spring Boot/Spring Data Redis Reactive application that shows a searchable 
 as well as a personal finance management overview with realtime balance and biggest spenders updates. UI in Bootstrap/CSS/Vue.
 
 Features in this demo:
-
+- Redis 8.x
 - Redis Streams for the realtime transactions
 - Redis TimeSeries for the balance over time
 - RediSearch for searching transactions
@@ -18,7 +18,7 @@ Features in this demo:
 
 ## Prerequisites
 
-1. JDK 17 or higher (<https://openjdk.java.net/install/index.html>). Not needed if you're using Docker.
+1. JDK 24 (<https://openjdk.java.net/install/index.html>). Not needed if you're using Docker.
 1. Maven. Not needed if you're using Docker.
 1. Docker Desktop (<https://www.docker.com/products/docker-desktop>), or Colima with a docker/k8s/containerd runtime
 1. For running on Azure only: Azure CLI (<https://docs.microsoft.com/en-us/cli/azure/install-azure-cli>)

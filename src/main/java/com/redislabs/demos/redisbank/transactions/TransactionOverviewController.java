@@ -62,7 +62,8 @@ public class TransactionOverviewController {
     @GetMapping("/biggestspenders")
     public BiggestSpenders biggestSpenders() {
         Set<TypedTuple<String>> range = redis.opsForZSet().rangeByScoreWithScores(SORTED_SET_KEY, 0, Double.MAX_VALUE);
-        if (range.size() > 0) {
+        assert range != null;
+        if (!range.isEmpty()) {
             BiggestSpenders biggestSpenders = new BiggestSpenders(range.size());
             int i = 0;
             for (TypedTuple<String> typedTuple : range) {
@@ -93,8 +94,7 @@ public class TransactionOverviewController {
     @GetMapping("/transactions")
     public SearchResults<String, String> listTransactions() {
         RediSearchCommands<String, String> commands = srsc.sync();
-        SearchResults<String, String> results = commands.ftSearch(ACCOUNT_INDEX, "lars");
-        return results;
+        return commands.ftSearch(ACCOUNT_INDEX, "lars");
     }
 
 }

@@ -1,10 +1,17 @@
 package com.redislabs.demos.redisbank.transactions;
 
 import java.time.Duration;
+import java.util.Objects;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import io.lettuce.core.json.DefaultJsonParser;
+import io.lettuce.core.json.JsonParser;
+import io.lettuce.core.json.JsonPath;
+
 import com.redis.lettucemod.api.StatefulRedisModulesConnection;
 import com.redis.lettucemod.api.sync.RedisModulesCommands;
+
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.redislabs.demos.redisbank.Config;
 import com.redislabs.demos.redisbank.SerializationUtil;
 
@@ -33,26 +40,40 @@ public class BankTransactionForwarder
     private final StringRedisTemplate redis;
     private final SimpMessageSendingOperations smso;
 
-    //private final RedisModulesCommands<String, String> redisjson;
-    private final StatefulRedisModulesConnection<String, String> redisjson;
+
+    private final RedisModulesCommands<String, String> json;
+
 
     private final BankTransactionRepository btr;
     private StreamMessageListenerContainer<String, MapRecord<String, String, String>> container;
     private Subscription subscription;
 
-    public BankTransactionForwarder(Config config, StringRedisTemplate redis, SimpMessageSendingOperations smso,
-            BankTransactionRepository btr, StatefulRedisModulesConnection redisjson) {
+    public BankTransactionForwarder(
+            Config config,
+            StringRedisTemplate redis,
+            SimpMessageSendingOperations smso,
+            BankTransactionRepository btr,
+            StatefulRedisModulesConnection<String, String> json) {
         this.config = config;
         this.redis = redis;
         this.smso = smso;
         this.btr = btr;
-        this.redisjson = redisjson;
+        this.json = json.sync();
     }
 
     @Override
     public void afterPropertiesSet() throws Exception {
-        this.container = StreamMessageListenerContainer.create(redis.getConnectionFactory(),
-                StreamMessageListenerContainerOptions.builder().pollTimeout(Duration.ofMillis(1000)).build());
+        var connectionFactory = Objects.requireNonNull(
+                redis.getConnectionFactory(),
+                "RedisConnectionFactory must not be null"
+        );
+
+        this.container = StreamMessageListenerContainer.create(
+                connectionFactory,
+                StreamMessageListenerContainerOptions.builder()
+                        .pollTimeout(Duration.ofMillis(1000))
+                        .build()
+        );
         container.start();
         this.subscription = container.receive(StreamOffset.latest(TRANSACTIONS_STREAM), this);
         subscription.await(Duration.ofSeconds(10));
@@ -66,8 +87,13 @@ public class BankTransactionForwarder
         try {
             BankTransaction bankTransaction = SerializationUtil.deserializeObject(messageString, BankTransaction.class);
             btr.save(bankTransaction);
-            //TODO save as JSON
-            redisjson.sync().jsonSet("jsontx:"+bankTransaction.getId(), ".", messageString);
+
+            JsonParser parser = new DefaultJsonParser();
+            json.jsonSet(
+                    "jsontx:" + bankTransaction.getId(),
+                    JsonPath.ROOT_PATH,
+                    parser.createJsonValue(messageString)
+            );
 
         } catch (JsonProcessingException e) {
             LOGGER.error("Error parsing JSON: {}", e.getMessage());
