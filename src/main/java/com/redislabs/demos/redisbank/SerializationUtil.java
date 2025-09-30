@@ -30,7 +30,7 @@ public class SerializationUtil {
               mapper.readerFor(type).with(bootstrapSchema).readValues(is);
             return readValues.readAll();
         } catch (Exception e) {
-            LOGGER.error("Error occurred while loading object list from file " + fileName, e);
+            LOGGER.error("Error occurred while loading object list from file '{}'", fileName, e);
             return Collections.emptyList();
         }
     }
@@ -40,7 +40,7 @@ public class SerializationUtil {
         return mapper.writeValueAsString(object);
     }
 
-    public static <T> T deserializeObject(String value, Class<T> clazz) throws JsonMappingException, JsonProcessingException    {
+    public static <T> T deserializeObject(String value, Class<T> clazz) throws JsonProcessingException    {
         mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
         return mapper.readValue(value, clazz);
     }

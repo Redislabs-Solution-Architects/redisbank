@@ -1,12 +1,12 @@
 package com.redislabs.demos.redisbank.transactions;
 
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -29,8 +29,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import io.lettuce.core.RedisCommandExecutionException;
-
 @Component
 public class BankTransactionGenerator {
 
@@ -51,7 +49,7 @@ public class BankTransactionGenerator {
     private final StringRedisTemplate redis;
     private final StatefulRedisModulesConnection<String, String> connection;
 
-    public BankTransactionGenerator(StringRedisTemplate redis, StatefulRedisModulesConnection<String, String> connection) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public BankTransactionGenerator(StringRedisTemplate redis, StatefulRedisModulesConnection<String, String> connection) throws NoSuchAlgorithmException {
         this.redis = redis;
         this.connection = connection;
         transactionSources = SerializationUtil.loadObjectList(TransactionSource.class, "/transaction_sources.csv");
@@ -97,7 +95,7 @@ public class BankTransactionGenerator {
 
     private void createTimeSeries() {
         redis.delete(BALANCE_TS);
-        CreateOptions co = CreateOptions.builder().retentionPeriod(0).build();
+        CreateOptions<String, String> co = CreateOptions.<String, String>builder().retentionPeriod(Duration.ZERO).build();
         connection.sync().tsCreate(BALANCE_TS, co);
         LOGGER.info("Created {} time seris", BALANCE_TS);
     }
@@ -108,7 +106,6 @@ public class BankTransactionGenerator {
             BankTransaction bankTransaction = createBankTransaction();
             streamBankTransaction(bankTransaction);
         }
-        ;
     }
 
     @Scheduled(fixedDelay = TRANSACTION_RATE_MS)
@@ -126,7 +123,7 @@ public class BankTransactionGenerator {
             redis.opsForStream().add(TRANSACTIONS_STREAM, update);
             LOGGER.info("Streamed {}", transactionString);
         } catch (JsonProcessingException e) {
-            LOGGER.error("Error serialising object to JSON", e.getMessage());
+            LOGGER.error("Error serialising object to JSON", e);
         }
     }
 

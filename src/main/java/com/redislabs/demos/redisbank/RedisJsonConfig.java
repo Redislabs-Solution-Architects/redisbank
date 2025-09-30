@@ -18,7 +18,7 @@ public class RedisJsonConfig {
         RedisURI.Builder b = RedisURI.Builder.redis(lcf.getHostName(), lcf.getPort())
                 .withDatabase(lcf.getDatabase());
         if (lcf.getPassword() != null && !lcf.getPassword().isEmpty()) {
-            b.withPassword(lcf.getPassword());
+            b.withPassword(lcf.getPassword().toCharArray());
         }
         return RedisModulesClient.create(b.build());
     }

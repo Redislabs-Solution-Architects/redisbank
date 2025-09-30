@@ -3,7 +3,7 @@ package com.redislabs.demos.redisbank;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 
-import io.micrometer.core.instrument.util.StringUtils;
+import org.springframework.util.StringUtils;
 
 public class Utilities {
 
@@ -17,9 +17,9 @@ public class Utilities {
      *                 same for a given username
      * @return the generated fake IBAN
      */
-    public static final String generateFakeIbanFrom(String userName) {
+    public static String generateFakeIbanFrom(String userName) {
 
-        if (StringUtils.isEmpty(userName)) {
+        if (!StringUtils.hasText(userName)) {
             throw new IllegalArgumentException("Parameter userName should have a value");
         }
 
@@ -42,15 +42,15 @@ public class Utilities {
 
     }
 
-    private static final void appendDigits(StringBuilder builder, SecureRandom random, int numberOfDigits) {
+    private static void appendDigits(StringBuilder builder, SecureRandom random, int numberOfDigits) {
         for (int i = 0; i < numberOfDigits; i++) {
             builder.append(random.nextInt(10));
         }
 
     }
 
-    public static final String generatePortfolioIdFrom(String userName)   {
-        if (StringUtils.isEmpty(userName)) {
+    public static String generatePortfolioIdFrom(String userName)   {
+        if (!StringUtils.hasText(userName)) {
             throw new IllegalArgumentException("Parameter userName should have a value");
         }
 
