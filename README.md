@@ -19,11 +19,28 @@ Features in this demo:
 ## Prerequisites
 
 1. JDK 24 (<https://openjdk.java.net/install/index.html>). Not needed if you're using Docker.
-1. Maven. Not needed if you're using Docker.
-1. Docker Desktop (<https://www.docker.com/products/docker-desktop>), or Colima with a docker/k8s/containerd runtime
-1. For running on Azure only: Azure CLI (<https://docs.microsoft.com/en-us/cli/azure/install-azure-cli>)
-1. For running on Azure only: Azure Spring Cloud extension for the Azure CLI (<https://docs.microsoft.com/en-us/cli/azure/spring-cloud?view=azure-cli-latest>)
-1. For running on Kubernetes: a Kubernetes cluster
+2. Maven. Not needed if you're using Docker.
+3. Docker Desktop (<https://www.docker.com/products/docker-desktop>), or Colima with a docker/k8s/containerd runtime
+4. For running on Azure only: Azure CLI (<https://docs.microsoft.com/en-us/cli/azure/install-azure-cli>)
+5. For running on Azure only: Azure Spring Cloud extension for the Azure CLI (<https://docs.microsoft.com/en-us/cli/azure/spring-cloud?view=azure-cli-latest>)
+6. For running on Kubernetes: a Kubernetes cluster
+7. Install NodeJS using NVM if you want to update the Web UI
+
+```
+brew install nvm
+mkdir ~/.nvm
+echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.zshrc
+echo '[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && . "/opt/homebrew/opt/nvm/nvm.sh"' >> ~/.zshrc
+source ~/.zshrc
+
+# Installer la version LTS
+nvm install --lts
+nvm use --lts
+
+# Vérifier
+node -v
+npm -v
+```
 
 ## Running locally
 
@@ -91,4 +108,64 @@ Please see [Deploy on Kubernetes with Redis Enterprise](./kubernetes/redis-enter
 ## V.next
 
 1. Thread safety. Data is currently generated off of a single stream of transactions, which means it's the same for all users. Not a problem with the current iteration because it's single user, but beware when expanding this to multi-user.
-1. Hardcoded values. Code uses hardcoded values throughout the code, these need to be replaced with proper variables.
+2. Hardcoded values. Code uses hardcoded values throughout the code, these need to be replaced with proper variables.
+
+## Development
+
+### Running in development mode
+
+1. Start a redis 8 container listening on default port 6379
+
+2. Start Spring
+
+    `./mvnw spring-boot:run`
+    or with Debug mode
+    
+    Menu Run and Debug → “create a launch.json” → choose Java → and replace by this :
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Debug RedisBank Backend",
+      "request": "launch",
+      "mainClass": "com.redislabs.demos.redisbank.RedisbankApplication",
+      "projectName": "redisbank",
+      "args": "",
+      "env": {
+        "SPRING_PROFILES_ACTIVE": "dev"
+      }
+    }
+  ]
+}
+```    
+    Then, in the Run Palette, click on the green arrow left of "RedisBankApplication"
+
+3. Start the web application
+
+    `cd frontend;  npm run dev`
+
+### Packaging a new version
+
+#### clean install dependencies
+
+```sh
+cd frontend
+npm ci
+```
+
+#### build a deployable version of the frontend & copy to Springboot applicaiton
+
+(from frontend folder)
+```sh
+
+```
+
+#### Build the docker image
+
+(from root of the project)
+```sh
+./docker-rebuild.sh
+```

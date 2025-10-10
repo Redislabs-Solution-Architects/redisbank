@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noImplicitAny": true,
+    "useDefineForClassFields": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": { "@/*": ["src/*"] },
+    "types": ["vite/client", "node"],        // + node (optionnel)
+    "skipLibCheck": true                     // (optionnel) évite les warnings des libs tierces
+  },
+  "include": [
+    "src",
+    "env.d.ts",
+    "src/types/**/*.d.ts"                    // + on voit les shims ici
+  ]
+}
