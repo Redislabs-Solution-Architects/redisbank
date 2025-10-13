@@ -160,7 +160,7 @@ npm ci
 
 (from frontend folder)
 ```sh
-
+npm run copy:to-backend
 ```
 
 #### Build the docker image
