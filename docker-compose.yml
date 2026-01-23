@@ -4,7 +4,6 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
-      - "8001:8001"
     networks:
       - redis-bank-network
 
@@ -17,6 +16,18 @@ services:
       - REDIS_PORT=6379
     ports:
       - "8080:8080"
+    networks:
+      - redis-bank-network
+    depends_on:
+      - app-redis
+
+  redisinsight:
+    image: redis/redisinsight:latest
+    environment:
+      RI_DATABASE_MANAGEMENT: "false"
+      RI_REDIS_HOST: "app-redis"
+    ports:
+      - 8001:5540
     networks:
       - redis-bank-network
     depends_on:
