@@ -9,9 +9,12 @@ import type { TopSpenders } from '@/services/bankApi'
 
 const props = defineProps<{ data: TopSpenders }>()
 
-const series = computed(() => props.data.series)
+const series = computed(() =>
+  (props.data.series ?? [])
+    .map((v) => (Number.isFinite(v) ? Math.max(0, Math.round(v * 100) / 100) : 0))
+)
 const options = computed(() => ({
-  labels: props.data.labels,
+  labels: props.data.labels ?? [],
   legend: { position: 'right' }
 }))
 </script>

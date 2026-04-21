@@ -2,10 +2,16 @@ import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(async ({ command }) => {
+  const plugins = [vue()]
+  if (command === 'serve') {
+    const { default: vueDevTools } = await import('vite-plugin-vue-devtools')
+    plugins.push(vueDevTools())
+  }
+
+  return {
   server: {
     proxy: {
       '/api': 'http://localhost:8080',
@@ -13,10 +19,7 @@ export default defineConfig({
       '/ws': { target: 'http://localhost:8080', ws: true, changeOrigin: true }
     }
   },
-  plugins: [
-    vue(),
-    vueDevTools(),
-  ],
+  plugins,
   define: {
     // Polyfills au runtime (et pendant l’optimisation esbuild)
     global: 'window',
@@ -27,4 +30,5 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  }
 })

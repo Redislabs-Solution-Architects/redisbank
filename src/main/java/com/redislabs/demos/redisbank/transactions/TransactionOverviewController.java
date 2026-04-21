@@ -2,8 +2,8 @@ package com.redislabs.demos.redisbank.transactions;
 
 import com.redis.lettucemod.api.StatefulRedisModulesConnection;
 import com.redis.lettucemod.api.sync.RediSearchCommands;
-import com.redis.lettucemod.search.SearchOptions;
-import com.redis.lettucemod.search.SearchResults;
+import io.lettuce.core.search.SearchReply;
+import io.lettuce.core.search.arguments.SearchArgs;
 import com.redis.lettucemod.timeseries.Sample;
 import com.redis.lettucemod.timeseries.TimeRange;
 import com.redislabs.demos.redisbank.Config;
@@ -13,7 +13,10 @@ import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/api")
@@ -80,21 +83,32 @@ public class TransactionOverviewController {
 
     @GetMapping("/search")
     @SuppressWarnings("all")
-    public SearchResults<String, String> searchTransactions(@RequestParam("term") String term) {
+    public List<Map<String, String>> searchTransactions(@RequestParam("term") String term) {
         RediSearchCommands<String, String> commands = srsc.sync();
 
-        SearchOptions options = SearchOptions
-                .builder().highlight(SearchOptions.Highlight.builder().field("description").field("fromAccountName")
-                        .field("transactionType").tags("<mark>","</mark>").build()).build();
+        SearchArgs<String, String> options = SearchArgs.<String, String>builder()
+                .highlightField("description")
+                .highlightField("fromAccountName")
+                .highlightField("transactionType")
+                .highlightTags("<mark>", "</mark>")
+                .build();
 
-        SearchResults<String, String> results = commands.ftSearch(SEARCH_INDEX, term, options);
-        return results;
+        SearchReply<String, String> results = commands.ftSearch(SEARCH_INDEX, term, options);
+        return toLegacyDocumentList(results);
     }
 
     @GetMapping("/transactions")
-    public SearchResults<String, String> listTransactions() {
+    public List<Map<String, String>> listTransactions() {
         RediSearchCommands<String, String> commands = srsc.sync();
-        return commands.ftSearch(ACCOUNT_INDEX, "lars");
+        return toLegacyDocumentList(commands.ftSearch(ACCOUNT_INDEX, "lars"));
+    }
+
+    private List<Map<String, String>> toLegacyDocumentList(SearchReply<String, String> reply) {
+        return reply.getResults().stream().map(result -> {
+            Map<String, String> row = new LinkedHashMap<>(result.getFields());
+            row.put("id", result.getId());
+            return row;
+        }).collect(Collectors.toList());
     }
 
 }

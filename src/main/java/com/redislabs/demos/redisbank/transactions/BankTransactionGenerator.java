@@ -16,8 +16,7 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.redis.lettucemod.api.StatefulRedisModulesConnection;
 import com.redis.lettucemod.api.sync.RediSearchCommands;
-import com.redis.lettucemod.search.Field;
-import com.redis.lettucemod.search.TextField;
+import io.lettuce.core.search.arguments.TextFieldArgs;
 import com.redis.lettucemod.timeseries.CreateOptions;
 import com.redis.lettucemod.timeseries.Sample;
 import com.redislabs.demos.redisbank.SerializationUtil;
@@ -78,12 +77,17 @@ public class BankTransactionGenerator {
             commands.ftDropindex(SEARCH_INDEX);
         }
 
-        commands.ftCreate(ACCOUNT_INDEX, Field.text("toAccountName").build());
+        commands.ftCreate(ACCOUNT_INDEX, List.of(
+                TextFieldArgs.<String>builder().name("toAccountName").build()));
         LOGGER.info("Created {} index", ACCOUNT_INDEX);
 
-        commands.ftCreate(SEARCH_INDEX, Field.text("description").matcher(TextField.PhoneticMatcher.ENGLISH).build(),
-                Field.text("fromAccountName").matcher(TextField.PhoneticMatcher.ENGLISH).build(),
-                Field.text("transactionType").matcher(TextField.PhoneticMatcher.ENGLISH).build());
+        commands.ftCreate(SEARCH_INDEX, List.of(
+                TextFieldArgs.<String>builder().name("description").phonetic(TextFieldArgs.PhoneticMatcher.ENGLISH)
+                        .build(),
+                TextFieldArgs.<String>builder().name("fromAccountName")
+                        .phonetic(TextFieldArgs.PhoneticMatcher.ENGLISH).build(),
+                TextFieldArgs.<String>builder().name("transactionType")
+                        .phonetic(TextFieldArgs.PhoneticMatcher.ENGLISH).build()));
         LOGGER.info("Created {} index", SEARCH_INDEX);
     }
 

@@ -1,5 +1,6 @@
 # ---- build ----
-FROM maven:3.9.11-eclipse-temurin-24 AS build
+# Align with pom.xml <java.version> (currently 21)
+FROM maven:3.9.11-eclipse-temurin-21 AS build
 WORKDIR /home/app
 
 # 1) Copier le POM d'abord pour maximiser le cache des deps
@@ -13,7 +14,7 @@ COPY src ./src
 RUN mvn -B -DskipTests clean package
 
 # ---- runtime ----
-FROM eclipse-temurin:24-jre
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # Si ton jar repackage Spring Boot est unique dans target/, ça marche :
